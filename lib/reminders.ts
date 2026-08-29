@@ -37,6 +37,10 @@ export interface Reminder {
   fireAt: string;
   title: string;
   body: string;
+  /** The deadline entry's own context, e.g. "early bird registration". */
+  context: string;
+  /** True once this exact entry and stage has already been delivered. */
+  sent: boolean;
 }
 
 /** What the store needs to flip on a single deadline entry after a reminder went out. */
@@ -79,8 +83,12 @@ function dayLabel(days: number): string {
   return days === 1 ? '1 day' : `${days} days`;
 }
 
-/** Every reminder still owed for one item, dated entries and undated ones alike. */
-export function remindersForItem(item: Item): Reminder[] {
+/**
+ * Every reminder one item produces — one per deadline entry per stage — whether
+ * it has already gone out or not. The single place notification copy is built,
+ * so the scheduler and the notifications screen never drift apart.
+ */
+export function buildReminders(item: Item): Reminder[] {
   const reminders: Reminder[] = [];
   const label = itemLabel(item);
 
@@ -92,7 +100,7 @@ export function remindersForItem(item: Item): Reminder[] {
       const leadDate = deadline.reminder_date;
 
       // Skipped when the lead reminder would land on the deadline itself.
-      if (!deadline.lead_reminder_sent && leadDate && lead > 0) {
+      if (leadDate && lead > 0) {
         reminders.push({
           key: reminderKey(item.id, deadline.id, 'lead'),
           itemId: item.id,
@@ -101,24 +109,26 @@ export function remindersForItem(item: Item): Reminder[] {
           fireAt: leadDate,
           title: `${context} in ${dayLabel(lead)}`,
           body: `${label} · ${formatShortDate(deadline.date)}`,
+          context: deadline.context,
+          sent: deadline.lead_reminder_sent,
         });
       }
 
-      if (!deadline.reminder_sent) {
-        reminders.push({
-          key: reminderKey(item.id, deadline.id, 'day'),
-          itemId: item.id,
-          deadlineId: deadline.id,
-          stage: 'day',
-          fireAt: deadline.date,
-          title: `${context} is today`,
-          body: `${label} · ${formatShortDate(deadline.date)}`,
-        });
-      }
+      reminders.push({
+        key: reminderKey(item.id, deadline.id, 'day'),
+        itemId: item.id,
+        deadlineId: deadline.id,
+        stage: 'day',
+        fireAt: deadline.date,
+        title: `${context} is today`,
+        body: `${label} · ${formatShortDate(deadline.date)}`,
+        context: deadline.context,
+        sent: deadline.reminder_sent,
+      });
       continue;
     }
 
-    if (deadline.reminder_sent || !deadline.reminder_date) continue;
+    if (!deadline.reminder_date) continue;
 
     reminders.push({
       key: reminderKey(item.id, deadline.id, 'nudge'),
@@ -130,10 +140,17 @@ export function remindersForItem(item: Item): Reminder[] {
       body: isResurfaceDeadline(deadline)
         ? label
         : `${label} · add a date so you get a proper reminder`,
+      context: deadline.context,
+      sent: deadline.reminder_sent,
     });
   }
 
   return reminders;
+}
+
+/** Every reminder still owed for one item, dated entries and undated ones alike. */
+export function remindersForItem(item: Item): Reminder[] {
+  return buildReminders(item).filter((reminder) => !reminder.sent);
 }
 
 /** Everything still owed across the whole library, soonest first. */
@@ -142,6 +159,16 @@ export function pendingReminders(items: Item[]): Reminder[] {
     .flatMap((item) => remindersForItem(item))
     .sort((a, b) => a.fireAt.localeCompare(b.fireAt));
 }
+
+/** Every reminder in the library, sent ones included, soonest first. */
+export function allReminders(items: Item[]): Reminder[] {
+  return items
+    .flatMap((item) => buildReminders(item))
+    .sort((a, b) => a.fireAt.localeCompare(b.fireAt));
+}
+
+/** Whether the device this build runs on can deliver reminders at all. */
+export const remindersSupported = isSupported;
 
 /** Human-readable line for a reminder, used by the item screen. */
 export function reminderSummary(reminder: Reminder, now: Date = new Date()): string {

@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { ArrowRight, CalendarCheck, LogOut, Plus } from 'lucide-react-native';
+import { ArrowRight, BellRing, CalendarCheck, LogOut, Plus } from 'lucide-react-native';
 import { Button, Card, SearchField, Spinner, Typography } from 'heroui-native';
 import { Pressable, RefreshControl, ScrollView, View } from 'react-native';
 import { useMemo, useState } from 'react';
@@ -9,6 +9,7 @@ import { UpcomingDeadlineCard } from '@/components/UpcomingDeadlineCard';
 import { useAuth } from '@/lib/auth';
 import { COLORS } from '@/lib/colors';
 import { daysUntil, upcomingDeadlines } from '@/lib/deadlines';
+import { pendingReminders } from '@/lib/reminders';
 import { countsByCategory, useSmartSaveStore } from '@/lib/store';
 import { CATEGORIES, type Category } from '@/lib/types';
 
@@ -41,6 +42,12 @@ export default function HomeScreen() {
   const isFirstLoad = status === 'loading' && items.length === 0;
   const trimmedQuery = query.trim();
 
+  const dueReminderCount = useMemo(() => {
+    const now = Date.now();
+    return pendingReminders(items).filter((reminder) => new Date(reminder.fireAt).getTime() <= now)
+      .length;
+  }, [items]);
+
   const runSearch = () => {
     if (!trimmedQuery) return;
     router.push({ pathname: '/search', params: { q: trimmedQuery } });
@@ -64,6 +71,27 @@ export default function HomeScreen() {
               <Typography type="body-sm" color="muted">
                 {`${items.length} saved · ${dueThisWeek} due this week`}
               </Typography>
+            </View>
+            <View>
+              <Button
+                isIconOnly
+                size="sm"
+                variant="ghost"
+                accessibilityLabel="Reminder notifications"
+                onPress={() => router.push('/notifications')}
+              >
+                <BellRing size={18} color={COLORS.muted} />
+              </Button>
+              {dueReminderCount > 0 ? (
+                <View
+                  className="bg-urgent absolute -top-0.5 -right-0.5 min-w-4 items-center justify-center rounded-full px-1 py-0.5"
+                  pointerEvents="none"
+                >
+                  <Typography type="body-xs" weight="bold" style={{ color: COLORS.onAccent }}>
+                    {dueReminderCount > 9 ? '9+' : String(dueReminderCount)}
+                  </Typography>
+                </View>
+              ) : null}
             </View>
             <Button
               isIconOnly
