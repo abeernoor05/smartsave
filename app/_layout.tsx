@@ -10,10 +10,10 @@ import {
   useFonts,
 } from '@expo-google-fonts/inter';
 import Constants, { ExecutionEnvironment } from 'expo-constants';
-import { Platform } from 'react-native';
+import { Platform, View } from 'react-native';
 import { useEffect } from 'react';
 import * as DevClient from 'expo-dev-client';
-import { HeroUINativeProvider, useThemeColor } from 'heroui-native';
+import { HeroUINativeProvider, Spinner, useThemeColor } from 'heroui-native';
 import { Uniwind } from 'uniwind';
 import {
   ErrorBoundary as ExpoErrorBoundary,
@@ -25,7 +25,10 @@ import {
 import { initPostHog } from '@/lib/posthog';
 import { registerServiceWorker } from '@/lib/registerServiceWorker';
 import { reportErrorToParent } from '@/lib/reportPreviewError';
+import { AuthProvider, useAuth } from '@/lib/auth';
+import { useSmartSaveStore } from '@/lib/store';
 import { InstallPrompt } from '@/components/InstallPrompt';
+import { SignInScreen } from '@/components/SignInScreen';
 
 /**
  * Custom ErrorBoundary that reports React render errors to the parent window (Bilt preview iframe)
@@ -76,6 +79,34 @@ function AppStack() {
       <Stack.Screen name="search" options={{ title: 'Search' }} />
     </Stack>
   );
+}
+
+/** Nothing renders until we know who is signed in; their items load right after. */
+function AuthGate() {
+  const { session, isLoading } = useAuth();
+  const userId = session?.user.id ?? null;
+  const loadItems = useSmartSaveStore((state) => state.loadItems);
+  const clearItems = useSmartSaveStore((state) => state.clear);
+
+  useEffect(() => {
+    if (userId) {
+      void loadItems();
+    } else {
+      clearItems();
+    }
+  }, [userId, loadItems, clearItems]);
+
+  if (isLoading) {
+    return (
+      <View className="bg-background flex-1 items-center justify-center">
+        <Spinner />
+      </View>
+    );
+  }
+
+  if (!session) return <SignInScreen />;
+
+  return <AppStack />;
 }
 
 export default function RootLayout() {
@@ -171,7 +202,9 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <HeroUINativeProvider>
-        <AppStack />
+        <AuthProvider>
+          <AuthGate />
+        </AuthProvider>
         <InstallPrompt />
       </HeroUINativeProvider>
     </GestureHandlerRootView>

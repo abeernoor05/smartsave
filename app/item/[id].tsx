@@ -36,7 +36,10 @@ export default function ItemDetailScreen() {
   const items = useSmartSaveStore((state) => state.items);
   const setCategory = useSmartSaveStore((state) => state.setCategory);
   const addDeadline = useSmartSaveStore((state) => state.addDeadline);
+  const updateDeadline = useSmartSaveStore((state) => state.updateDeadline);
+  const removeDeadline = useSmartSaveStore((state) => state.removeDeadline);
   const removeItem = useSmartSaveStore((state) => state.removeItem);
+  const storeError = useSmartSaveStore((state) => state.error);
 
   const { width } = useWindowDimensions();
   const [isCaptionExpanded, setIsCaptionExpanded] = useState(false);
@@ -97,13 +100,19 @@ export default function ItemDetailScreen() {
           <Typography type="body">{item.ai_summary}</Typography>
         </Card>
 
+        {storeError ? (
+          <Typography type="body-xs" className="text-urgent">
+            {storeError}
+          </Typography>
+        ) : null}
+
         <View className="gap-2">
           <Typography type="body" weight="semibold">
             Folder
           </Typography>
           <CategoryPicker
             value={item.category}
-            onChange={(category) => setCategory(item.id, category)}
+            onChange={(category) => void setCategory(item.id, category)}
           />
         </View>
 
@@ -116,7 +125,7 @@ export default function ItemDetailScreen() {
               size="sm"
               variant="secondary"
               onPress={() =>
-                addDeadline(item.id, addDays(new Date(), 7).toISOString(), 'Follow up')
+                void addDeadline(item.id, addDays(new Date(), 7).toISOString(), 'Follow up')
               }
             >
               <Plus size={14} color="#4F46E5" />
@@ -126,7 +135,12 @@ export default function ItemDetailScreen() {
 
           {deadlines.length > 0 ? (
             deadlines.map((deadline) => (
-              <DeadlineListItem key={deadline.id} itemId={item.id} deadline={deadline} />
+              <DeadlineListItem
+                key={deadline.id}
+                deadline={deadline}
+                onChange={(patch) => void updateDeadline(item.id, deadline.id, patch)}
+                onRemove={() => void removeDeadline(item.id, deadline.id)}
+              />
             ))
           ) : (
             <Card className="flex-row items-start gap-3 p-4">
@@ -193,7 +207,7 @@ export default function ItemDetailScreen() {
           <Button
             variant="danger-soft"
             onPress={() => {
-              removeItem(item.id);
+              void removeItem(item.id);
               goBackOrReplace('/');
             }}
           >

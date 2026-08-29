@@ -1,105 +1,231 @@
 import { create } from 'zustand';
 
-import { reminderDateFor } from '@/lib/deadlines';
-import { MOCK_ITEMS } from '@/lib/mockItems';
-import type { Category, Deadline, Item, ItemAnalysis } from '@/lib/types';
+import { backendErrorMessage, bilt } from '@/lib/backend';
+import { applyDeadlinePatch, createDeadline, type DeadlinePatch } from '@/lib/deadlines';
+import {
+  type Category,
+  type Deadline,
+  isCategory,
+  isConfidence,
+  isPlatform,
+  type Item,
+  type NewItem,
+} from '@/lib/types';
 import { genId } from '@/lib/utils';
+
+const TABLE = 'items';
+const SELECT_COLUMNS =
+  'id, original_url, platform, thumbnail_url, caption_text, ocr_text, ai_summary, category, has_deadline, deadlines, confidence, saved_at';
+
+export type LoadStatus = 'idle' | 'loading' | 'ready' | 'error';
 
 interface SmartSaveState {
   items: Item[];
-  saveAnalyzedLink: (originalUrl: string, analysis: ItemAnalysis) => Item;
-  addDeadline: (itemId: string, date: string, context: string) => void;
-  updateDeadline: (
-    itemId: string,
-    deadlineId: string,
-    patch: Partial<Pick<Deadline, 'date' | 'context' | 'reminder_date'>>,
-  ) => void;
-  removeDeadline: (itemId: string, deadlineId: string) => void;
-  setCategory: (itemId: string, category: Category) => void;
-  removeItem: (itemId: string) => void;
+  status: LoadStatus;
+  error: string | null;
+  /** Reads every saved row for the signed-in user. */
+  loadItems: () => Promise<void>;
+  /** Inserts a new row and returns the saved item. */
+  createItem: (input: NewItem) => Promise<Item>;
+  addDeadline: (itemId: string, date: string | null, context: string) => Promise<void>;
+  updateDeadline: (itemId: string, deadlineId: string, patch: DeadlinePatch) => Promise<void>;
+  removeDeadline: (itemId: string, deadlineId: string) => Promise<void>;
+  setCategory: (itemId: string, category: Category) => Promise<void>;
+  removeItem: (itemId: string) => Promise<void>;
+  /** Drops the in-memory copy, e.g. on sign out. */
+  clear: () => void;
+}
+
+interface ItemRow {
+  id: string;
+  original_url: string;
+  platform: string | null;
+  thumbnail_url: string | null;
+  caption_text: string | null;
+  ocr_text: string | null;
+  ai_summary: string | null;
+  category: string | null;
+  has_deadline: boolean | null;
+  deadlines: unknown;
+  confidence: string | null;
+  saved_at: string;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null;
+}
+
+function parseDeadlines(value: unknown): Deadline[] {
+  if (!Array.isArray(value)) return [];
+  return value.flatMap((entry): Deadline[] => {
+    if (!isRecord(entry)) return [];
+    const raw = entry;
+    const date = typeof raw.date === 'string' && raw.date.length > 0 ? raw.date : null;
+    const reminder =
+      typeof raw.reminder_date === 'string' && raw.reminder_date.length > 0
+        ? raw.reminder_date
+        : null;
+    return [
+      {
+        id: typeof raw.id === 'string' && raw.id.length > 0 ? raw.id : genId(),
+        date,
+        context: typeof raw.context === 'string' ? raw.context : '',
+        reminder_date: reminder,
+        reminder_sent: raw.reminder_sent === true,
+      },
+    ];
+  });
+}
+
+/** Database row -> the Item shape the UI works with. */
+function toItem(row: ItemRow): Item {
+  const deadlines = parseDeadlines(row.deadlines);
+  return {
+    id: row.id,
+    original_url: row.original_url,
+    platform: isPlatform(row.platform) ? row.platform : 'other',
+    thumbnail_url: row.thumbnail_url ?? '',
+    caption_text: row.caption_text ?? '',
+    ocr_text: row.ocr_text ?? '',
+    ai_summary: row.ai_summary ?? '',
+    category: isCategory(row.category) ? row.category : 'General',
+    has_deadline: row.has_deadline ?? deadlines.length > 0,
+    deadlines,
+    confidence: isConfidence(row.confidence) ? row.confidence : 'medium',
+    saved_at: row.saved_at,
+  };
 }
 
 function withDeadlines(item: Item, deadlines: Deadline[]): Item {
   return { ...item, deadlines, has_deadline: deadlines.length > 0 };
 }
 
-export const useSmartSaveStore = create<SmartSaveState>((set) => ({
-  items: MOCK_ITEMS,
+export const useSmartSaveStore = create<SmartSaveState>((set, get) => {
+  /** Optimistic local edit, then persist; rolls back if the database refuses. */
+  const persist = async (itemId: string, transform: (item: Item) => Item) => {
+    const previous = get().items;
+    const next = previous.map((item) => (item.id === itemId ? transform(item) : item));
+    const target = next.find((item) => item.id === itemId);
+    if (!target) return;
 
-  saveAnalyzedLink: (originalUrl, analysis) => {
-    const item: Item = {
-      id: genId(),
-      original_url: originalUrl,
-      saved_at: new Date().toISOString(),
-      ...analysis,
-    };
-    set((state) => ({ items: [item, ...state.items] }));
-    return item;
-  },
+    set({ items: next, error: null });
 
-  addDeadline: (itemId, date, context) => {
-    set((state) => ({
-      items: state.items.map((item) =>
-        item.id === itemId
-          ? withDeadlines(item, [
-              ...item.deadlines,
-              {
-                id: genId(),
-                date,
-                context,
-                reminder_date: reminderDateFor(date),
-                reminder_sent: false,
-              },
-            ])
-          : item,
-      ),
-    }));
-  },
+    const { error } = await bilt
+      .from(TABLE)
+      .update({
+        category: target.category,
+        has_deadline: target.has_deadline,
+        deadlines: target.deadlines,
+      })
+      .eq('id', itemId);
 
-  updateDeadline: (itemId, deadlineId, patch) => {
-    set((state) => ({
-      items: state.items.map((item) => {
-        if (item.id !== itemId) return item;
-        return withDeadlines(
+    if (error) {
+      set({ items: previous, error: backendErrorMessage(error, 'Could not save that change.') });
+    }
+  };
+
+  return {
+    items: [],
+    status: 'idle',
+    error: null,
+
+    loadItems: async () => {
+      set({ status: 'loading', error: null });
+      const { data, error } = await bilt
+        .from(TABLE)
+        .select(SELECT_COLUMNS)
+        .order('saved_at', { ascending: false });
+
+      if (error) {
+        set({
+          status: 'error',
+          error: backendErrorMessage(error, 'Could not load your saved links.'),
+        });
+        return;
+      }
+
+      set({
+        items: ((data ?? []) as ItemRow[]).map(toItem),
+        status: 'ready',
+        error: null,
+      });
+    },
+
+    createItem: async (input) => {
+      const { data: userData } = await bilt.auth.getUser();
+      const userId = userData.user?.id;
+      if (!userId) throw new Error('Sign in again to save this link.');
+
+      const { data, error } = await bilt
+        .from(TABLE)
+        .insert({
+          user_id: userId,
+          original_url: input.original_url,
+          platform: input.platform,
+          thumbnail_url: input.thumbnail_url,
+          caption_text: input.caption_text,
+          ocr_text: input.ocr_text,
+          ai_summary: input.ai_summary,
+          category: input.category,
+          has_deadline: input.deadlines.length > 0,
+          deadlines: input.deadlines,
+          confidence: input.confidence,
+        })
+        .select(SELECT_COLUMNS)
+        .single();
+
+      if (error || !data) {
+        throw new Error(backendErrorMessage(error, 'Could not save this link.'));
+      }
+
+      const item = toItem(data);
+      set((state) => ({ items: [item, ...state.items], status: 'ready', error: null }));
+      return item;
+    },
+
+    addDeadline: async (itemId, date, context) => {
+      await persist(itemId, (item) =>
+        withDeadlines(item, [...item.deadlines, createDeadline(date, context)]),
+      );
+    },
+
+    updateDeadline: async (itemId, deadlineId, patch) => {
+      await persist(itemId, (item) =>
+        withDeadlines(
           item,
-          item.deadlines.map((deadline) => {
-            if (deadline.id !== deadlineId) return deadline;
-            const next = { ...deadline, ...patch };
-            // Keep the reminder anchored to the deadline unless set explicitly.
-            if (patch.date && !patch.reminder_date) {
-              next.reminder_date = reminderDateFor(patch.date);
-              next.reminder_sent = false;
-            }
-            return next;
-          }),
-        );
-      }),
-    }));
-  },
+          item.deadlines.map((deadline) =>
+            deadline.id === deadlineId ? applyDeadlinePatch(deadline, patch) : deadline,
+          ),
+        ),
+      );
+    },
 
-  removeDeadline: (itemId, deadlineId) => {
-    set((state) => ({
-      items: state.items.map((item) =>
-        item.id === itemId
-          ? withDeadlines(
-              item,
-              item.deadlines.filter((deadline) => deadline.id !== deadlineId),
-            )
-          : item,
-      ),
-    }));
-  },
+    removeDeadline: async (itemId, deadlineId) => {
+      await persist(itemId, (item) =>
+        withDeadlines(
+          item,
+          item.deadlines.filter((deadline) => deadline.id !== deadlineId),
+        ),
+      );
+    },
 
-  setCategory: (itemId, category) => {
-    set((state) => ({
-      items: state.items.map((item) => (item.id === itemId ? { ...item, category } : item)),
-    }));
-  },
+    setCategory: async (itemId, category) => {
+      await persist(itemId, (item) => ({ ...item, category }));
+    },
 
-  removeItem: (itemId) => {
-    set((state) => ({ items: state.items.filter((item) => item.id !== itemId) }));
-  },
-}));
+    removeItem: async (itemId) => {
+      const previous = get().items;
+      set({ items: previous.filter((item) => item.id !== itemId), error: null });
+
+      const { error } = await bilt.from(TABLE).delete().eq('id', itemId);
+      if (error) {
+        set({ items: previous, error: backendErrorMessage(error, 'Could not remove that item.') });
+      }
+    },
+
+    clear: () => set({ items: [], status: 'idle', error: null }),
+  };
+});
 
 export function getItemById(items: Item[], id: string | undefined): Item | undefined {
   if (!id) return undefined;

@@ -2,7 +2,7 @@ import { router } from 'expo-router';
 import { Card, Typography } from 'heroui-native';
 import { Pressable, View } from 'react-native';
 
-import { DeadlineTag, NudgeTag } from '@/components/DeadlineTag';
+import { DeadlineTag, NudgeTag, UnscheduledTag } from '@/components/DeadlineTag';
 import { Thumbnail } from '@/components/Thumbnail';
 import { CATEGORY_META, PLATFORM_META } from '@/lib/categories';
 import { nearestDeadline, nudgeDateFor, savedAgo } from '@/lib/deadlines';
@@ -44,6 +44,8 @@ export function ItemCard({ item, showCategory = false }: ItemCardProps) {
             <View className="flex-row flex-wrap items-center gap-1.5">
               {deadline ? (
                 <DeadlineTag date={deadline.date} extraCount={item.deadlines.length - 1} />
+              ) : item.deadlines.length > 0 ? (
+                <UnscheduledTag extraCount={item.deadlines.length - 1} />
               ) : (
                 <NudgeTag date={nudgeDateFor(item)} />
               )}

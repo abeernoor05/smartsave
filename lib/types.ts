@@ -1,6 +1,6 @@
 /**
- * Shapes mirror the `items` table exactly (see lib/items.schema.sql), so the
- * mock store can be swapped for a real database without touching the UI.
+ * Shapes mirror the `items` table exactly (see lib/items.schema.sql) and stay
+ * the single source of truth for an item across the app and the database.
  */
 
 export const CATEGORIES = ['Career', 'Travel', 'Finance', 'Learning', 'General'] as const;
@@ -9,18 +9,22 @@ export type Category = (typeof CATEGORIES)[number];
 export const PLATFORMS = ['linkedin', 'instagram', 'facebook', 'other'] as const;
 export type Platform = (typeof PLATFORMS)[number];
 
-export type Confidence = 'high' | 'medium' | 'low';
+export const CONFIDENCES = ['high', 'medium', 'low'] as const;
+export type Confidence = (typeof CONFIDENCES)[number];
 
 /** One entry of the `deadlines` jsonb array. */
 export interface Deadline {
   /** Local stable key for editing a single entry inside the array. */
   id: string;
-  /** ISO date string of the deadline itself. */
-  date: string;
+  /**
+   * ISO date string of the deadline itself, or null when a deadline was
+   * mentioned but no absolute date could be resolved.
+   */
+  date: string | null;
   /** Short explanation of what the date refers to. */
   context: string;
-  /** ISO date string of when the user should be reminded. */
-  reminder_date: string;
+  /** ISO date string of when the user should be reminded; null while undated. */
+  reminder_date: string | null;
   reminder_sent: boolean;
 }
 
@@ -52,3 +56,18 @@ export type ItemAnalysis = Pick<
   | 'deadlines'
   | 'confidence'
 >;
+
+/** Payload the store inserts into the `items` table. */
+export type NewItem = ItemAnalysis & { original_url: string };
+
+export function isCategory(value: unknown): value is Category {
+  return CATEGORIES.some((category) => category === value);
+}
+
+export function isPlatform(value: unknown): value is Platform {
+  return PLATFORMS.some((platform) => platform === value);
+}
+
+export function isConfidence(value: unknown): value is Confidence {
+  return CONFIDENCES.some((confidence) => confidence === value);
+}

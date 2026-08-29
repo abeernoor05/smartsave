@@ -36,6 +36,33 @@ export function DeadlineTag({ date, extraCount = 0, className }: DeadlineTagProp
   );
 }
 
+interface UnscheduledTagProps {
+  /** Number of additional deadlines on the same item. */
+  extraCount?: number;
+  className?: string;
+}
+
+/** Shown when a deadline was mentioned but no date could be pinned down. */
+export function UnscheduledTag({ extraCount = 0, className }: UnscheduledTagProps) {
+  return (
+    <View className={cn('flex-row items-center gap-1.5', className)}>
+      <View className="bg-soon-soft flex-row items-center gap-1 rounded-full px-2 py-1">
+        <CalendarClock size={12} color={URGENCY_STYLES.soon.color} />
+        <Typography type="body-xs" weight="semibold" className="text-soon">
+          Date to confirm
+        </Typography>
+      </View>
+      {extraCount > 0 ? (
+        <View className="bg-surface-tertiary rounded-full px-2 py-1">
+          <Typography type="body-xs" weight="medium" color="muted">
+            {`+${extraCount} more`}
+          </Typography>
+        </View>
+      ) : null}
+    </View>
+  );
+}
+
 interface NudgeTagProps {
   date: string;
   className?: string;

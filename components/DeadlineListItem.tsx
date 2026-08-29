@@ -1,17 +1,18 @@
-import { addDays, differenceInCalendarDays, parseISO } from 'date-fns';
+import { addDays, parseISO } from 'date-fns';
 import { Button, Card, Input, Label, TextField, Typography } from 'heroui-native';
-import { Check, Pencil, Trash2 } from 'lucide-react-native';
+import { CalendarPlus, Check, Pencil, Trash2 } from 'lucide-react-native';
 import { View } from 'react-native';
 import { useState } from 'react';
 
 import {
+  type DeadlinePatch,
   formatDate,
+  leadDaysOf,
   relativeDeadlineLabel,
   reminderDateFor,
   URGENCY_STYLES,
   urgencyOf,
 } from '@/lib/deadlines';
-import { useSmartSaveStore } from '@/lib/store';
 import type { Deadline } from '@/lib/types';
 
 const LEAD_OPTIONS = [1, 3, 7] as const;
@@ -23,32 +24,40 @@ const SHIFTS = [
 ] as const;
 
 interface DeadlineListItemProps {
-  itemId: string;
   deadline: Deadline;
+  onChange: (patch: DeadlinePatch) => void;
+  onRemove: () => void;
+  /** Open the editing controls straight away, used while reviewing a new save. */
+  startExpanded?: boolean;
 }
 
 /** One deadline from the item's deadlines array — editable and removable on its own. */
-export function DeadlineListItem({ itemId, deadline }: DeadlineListItemProps) {
-  const updateDeadline = useSmartSaveStore((state) => state.updateDeadline);
-  const removeDeadline = useSmartSaveStore((state) => state.removeDeadline);
-  const [isEditing, setIsEditing] = useState(false);
+export function DeadlineListItem({
+  deadline,
+  onChange,
+  onRemove,
+  startExpanded = false,
+}: DeadlineListItemProps) {
+  const [isEditing, setIsEditing] = useState(startExpanded);
 
-  const styles = URGENCY_STYLES[urgencyOf(deadline.date)];
-  const leadDays = Math.max(
-    0,
-    differenceInCalendarDays(parseISO(deadline.date), parseISO(deadline.reminder_date)),
-  );
+  const leadDays = leadDaysOf(deadline);
+  const styles = deadline.date ? URGENCY_STYLES[urgencyOf(deadline.date)] : URGENCY_STYLES.upcoming;
 
   const shiftDate = (days: number) => {
+    if (!deadline.date) return;
     const nextDate = addDays(parseISO(deadline.date), days).toISOString();
-    updateDeadline(itemId, deadline.id, {
-      date: nextDate,
-      reminder_date: reminderDateFor(nextDate, leadDays),
-    });
+    onChange({ date: nextDate, reminder_date: reminderDateFor(nextDate, leadDays) });
   };
 
   const setLead = (lead: number) => {
-    updateDeadline(itemId, deadline.id, { reminder_date: reminderDateFor(deadline.date, lead) });
+    if (!deadline.date) return;
+    onChange({ reminder_date: reminderDateFor(deadline.date, lead) });
+  };
+
+  const giveItADate = () => {
+    const nextDate = addDays(new Date(), 7).toISOString();
+    onChange({ date: nextDate, reminder_date: reminderDateFor(nextDate, leadDays) });
+    setIsEditing(true);
   };
 
   return (
@@ -58,14 +67,23 @@ export function DeadlineListItem({ itemId, deadline }: DeadlineListItemProps) {
           <Typography type="body-sm" weight="semibold">
             {deadline.context || 'Deadline'}
           </Typography>
-          <Typography type="body-xs" color="muted">
-            {formatDate(deadline.date)}
-          </Typography>
-          <View className={`self-start rounded-full px-2 py-1 ${styles.bgClass}`}>
-            <Typography type="body-xs" weight="semibold" className={styles.textClass}>
-              {relativeDeadlineLabel(deadline.date)}
+
+          {deadline.date ? (
+            <>
+              <Typography type="body-xs" color="muted">
+                {formatDate(deadline.date)}
+              </Typography>
+              <View className={`self-start rounded-full px-2 py-1 ${styles.bgClass}`}>
+                <Typography type="body-xs" weight="semibold" className={styles.textClass}>
+                  {relativeDeadlineLabel(deadline.date)}
+                </Typography>
+              </View>
+            </>
+          ) : (
+            <Typography type="body-xs" color="muted">
+              No exact date found for this one — pick one to get a reminder.
             </Typography>
-          </View>
+          )}
         </View>
 
         <View className="flex-row gap-1">
@@ -83,21 +101,28 @@ export function DeadlineListItem({ itemId, deadline }: DeadlineListItemProps) {
             size="sm"
             variant="ghost"
             accessibilityLabel="Remove deadline"
-            onPress={() => removeDeadline(itemId, deadline.id)}
+            onPress={onRemove}
           >
             <Trash2 size={16} color="#C4382E" />
           </Button>
         </View>
       </View>
 
-      <View className="bg-surface-secondary rounded-xl px-3 py-2">
-        <Typography type="body-xs" color="muted">
-          {leadDays === 0
-            ? `Reminder on the day · ${formatDate(deadline.reminder_date)}`
-            : `Reminder ${leadDays === 1 ? '1 day' : `${leadDays} days`} before · ${formatDate(deadline.reminder_date)}`}
-          {deadline.reminder_sent ? ' · already sent' : ''}
-        </Typography>
-      </View>
+      {deadline.date && deadline.reminder_date ? (
+        <View className="bg-surface-secondary rounded-xl px-3 py-2">
+          <Typography type="body-xs" color="muted">
+            {leadDays === 0
+              ? `Reminder on the day · ${formatDate(deadline.reminder_date)}`
+              : `Reminder ${leadDays === 1 ? '1 day' : `${leadDays} days`} before · ${formatDate(deadline.reminder_date)}`}
+            {deadline.reminder_sent ? ' · already sent' : ''}
+          </Typography>
+        </View>
+      ) : (
+        <Button size="sm" variant="secondary" onPress={giveItADate}>
+          <CalendarPlus size={14} color="#4F46E5" />
+          <Button.Label>Set a date</Button.Label>
+        </Button>
+      )}
 
       {isEditing ? (
         <View className="gap-3">
@@ -106,52 +131,58 @@ export function DeadlineListItem({ itemId, deadline }: DeadlineListItemProps) {
             <Input
               value={deadline.context}
               placeholder="e.g. Applications close"
-              onChangeText={(context: string) => updateDeadline(itemId, deadline.id, { context })}
+              onChangeText={(context: string) => onChange({ context })}
             />
           </TextField>
 
-          <View className="gap-1.5">
-            <Typography type="body-xs" color="muted">
-              Adjust the date
-            </Typography>
-            <View className="flex-row flex-wrap gap-2">
-              {SHIFTS.map((shift) => (
-                <Button
-                  key={shift.label}
-                  size="sm"
-                  variant="secondary"
-                  onPress={() => shiftDate(shift.days)}
-                >
-                  <Button.Label>{shift.label}</Button.Label>
-                </Button>
-              ))}
-            </View>
-          </View>
+          {deadline.date ? (
+            <>
+              <View className="gap-1.5">
+                <Typography type="body-xs" color="muted">
+                  Adjust the date
+                </Typography>
+                <View className="flex-row flex-wrap gap-2">
+                  {SHIFTS.map((shift) => (
+                    <Button
+                      key={shift.label}
+                      size="sm"
+                      variant="secondary"
+                      onPress={() => shiftDate(shift.days)}
+                    >
+                      <Button.Label>{shift.label}</Button.Label>
+                    </Button>
+                  ))}
+                </View>
+              </View>
 
-          <View className="gap-1.5">
-            <Typography type="body-xs" color="muted">
-              Remind me
-            </Typography>
-            <View className="flex-row flex-wrap gap-2">
-              {LEAD_OPTIONS.map((lead) => (
-                <Button
-                  key={lead}
-                  size="sm"
-                  variant={leadDays === lead ? 'primary' : 'secondary'}
-                  onPress={() => setLead(lead)}
-                >
-                  <Button.Label>{lead === 1 ? '1 day before' : `${lead} days before`}</Button.Label>
-                </Button>
-              ))}
-              <Button
-                size="sm"
-                variant={leadDays === 0 ? 'primary' : 'secondary'}
-                onPress={() => setLead(0)}
-              >
-                <Button.Label>On the day</Button.Label>
-              </Button>
-            </View>
-          </View>
+              <View className="gap-1.5">
+                <Typography type="body-xs" color="muted">
+                  Remind me
+                </Typography>
+                <View className="flex-row flex-wrap gap-2">
+                  {LEAD_OPTIONS.map((lead) => (
+                    <Button
+                      key={lead}
+                      size="sm"
+                      variant={leadDays === lead ? 'primary' : 'secondary'}
+                      onPress={() => setLead(lead)}
+                    >
+                      <Button.Label>
+                        {lead === 1 ? '1 day before' : `${lead} days before`}
+                      </Button.Label>
+                    </Button>
+                  ))}
+                  <Button
+                    size="sm"
+                    variant={leadDays === 0 ? 'primary' : 'secondary'}
+                    onPress={() => setLead(0)}
+                  >
+                    <Button.Label>On the day</Button.Label>
+                  </Button>
+                </View>
+              </View>
+            </>
+          ) : null}
         </View>
       ) : null}
     </Card>
