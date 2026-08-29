@@ -1,17 +1,19 @@
 import { Link, Stack } from 'expo-router';
-import { View, Text } from 'react-native';
+import { Typography } from 'heroui-native';
+import { View } from 'react-native';
 
 export default function NotFoundScreen() {
   return (
-    <>
-      <Stack.Screen options={{ title: 'Oops!' }} />
-      <View>
-        <Text>This screen doesn&apos;t exist.</Text>
-
-        <Link href="/">
-          <Text>Go to home screen!</Text>
-        </Link>
-      </View>
-    </>
+    <View className="bg-background flex-1 items-center justify-center gap-3 p-6">
+      <Stack.Screen options={{ title: 'Not found' }} />
+      <Typography type="body" weight="semibold">
+        This screen does not exist.
+      </Typography>
+      <Link href="/">
+        <Typography type="body-sm" weight="semibold" className="text-accent">
+          Go to your folders
+        </Typography>
+      </Link>
+    </View>
   );
 }

@@ -1,0 +1,38 @@
+import { Button, Typography } from 'heroui-native';
+import type { LucideIcon } from 'lucide-react-native';
+import { View } from 'react-native';
+
+interface EmptyStateProps {
+  icon: LucideIcon;
+  title: string;
+  description: string;
+  actionLabel?: string;
+  onAction?: () => void;
+}
+
+export function EmptyState({
+  icon: Icon,
+  title,
+  description,
+  actionLabel,
+  onAction,
+}: EmptyStateProps) {
+  return (
+    <View className="items-center gap-3 px-6 py-10">
+      <View className="bg-surface-tertiary size-12 items-center justify-center rounded-2xl">
+        <Icon size={22} color="#6A7080" />
+      </View>
+      <Typography type="body" weight="semibold" align="center">
+        {title}
+      </Typography>
+      <Typography type="body-sm" color="muted" align="center">
+        {description}
+      </Typography>
+      {actionLabel && onAction ? (
+        <Button size="sm" onPress={onAction}>
+          <Button.Label>{actionLabel}</Button.Label>
+        </Button>
+      ) : null}
+    </View>
+  );
+}
