@@ -1,12 +1,20 @@
-import { differenceInCalendarDays, formatDistanceToNowStrict, isBefore, parseISO } from 'date-fns';
+import {
+  addDays,
+  differenceInCalendarDays,
+  formatDistanceToNowStrict,
+  isBefore,
+  parseISO,
+} from 'date-fns';
 
 import type { Deadline, Item } from '@/lib/types';
 import { genId } from '@/lib/utils';
 
-/** Days before a detected deadline that the reminder fires. */
-export const REMINDER_LEAD_DAYS = 3;
-/** Gentle nudge for items where the AI found no deadline at all. */
-export const DEFAULT_NUDGE_DAYS = 7;
+/** Days before a dated deadline that the first reminder fires. */
+export const REMINDER_LEAD_DAYS = 2;
+/** Days after saving that an undated deadline (or a plain saved item) resurfaces. */
+export const UNDATED_NUDGE_DAYS = 3;
+/** Context of the entry added to items that carry no deadline at all. */
+export const DEFAULT_DEADLINE_CONTEXT = 'saved item';
 
 export type Urgency = 'overdue' | 'today' | 'soon' | 'upcoming';
 
@@ -15,6 +23,13 @@ export type ScheduledDeadline = Deadline & { date: string };
 
 export function isScheduled(deadline: Deadline): deadline is ScheduledDeadline {
   return typeof deadline.date === 'string' && deadline.date.length > 0;
+}
+
+/** The placeholder entry that only exists to resurface an item with no deadline. */
+export function isResurfaceDeadline(deadline: Deadline): boolean {
+  return (
+    !isScheduled(deadline) && deadline.context.trim().toLowerCase() === DEFAULT_DEADLINE_CONTEXT
+  );
 }
 
 export function daysUntil(iso: string, now: Date = new Date()): number {
@@ -65,12 +80,21 @@ export function savedAgo(iso: string): string {
   return `${formatDistanceToNowStrict(parseISO(iso))} ago`;
 }
 
-/** Reminder date for a deadline, clamped so it never lands after the deadline. */
+/** Reminder date for a dated deadline, clamped so it never lands after the deadline. */
 export function reminderDateFor(deadlineISO: string, leadDays = REMINDER_LEAD_DAYS): string {
   const deadline = parseISO(deadlineISO);
-  const reminder = new Date(deadline);
-  reminder.setDate(reminder.getDate() - Math.max(0, leadDays));
+  const reminder = addDays(deadline, -Math.max(0, leadDays));
   return (isBefore(reminder, deadline) ? reminder : deadline).toISOString();
+}
+
+/** Resurface date for an undated entry: three days after the item was saved. */
+export function nudgeDateFrom(savedAtISO: string): string {
+  return addDays(parseISO(savedAtISO), UNDATED_NUDGE_DAYS).toISOString();
+}
+
+/** Gentle nudge date for an item, from when it was saved. */
+export function nudgeDateFor(item: Item): string {
+  return nudgeDateFrom(item.saved_at);
 }
 
 /** How many days before its date this deadline reminds, defaulting to the standard lead. */
@@ -82,14 +106,53 @@ export function leadDaysOf(deadline: Deadline): number {
   );
 }
 
-export function createDeadline(date: string | null, context: string): Deadline {
+export function createDeadline(
+  date: string | null,
+  context: string,
+  savedAtISO: string = new Date().toISOString(),
+): Deadline {
   return {
     id: genId(),
     date,
     context,
-    reminder_date: date ? reminderDateFor(date) : null,
+    reminder_date: date ? reminderDateFor(date) : nudgeDateFrom(savedAtISO),
+    lead_reminder_sent: false,
     reminder_sent: false,
   };
+}
+
+/** The stand-in entry for items where no deadline was mentioned at all. */
+export function defaultDeadlineFor(savedAtISO: string): Deadline {
+  return createDeadline(null, DEFAULT_DEADLINE_CONTEXT, savedAtISO);
+}
+
+export interface NormalizedDeadlines {
+  deadlines: Deadline[];
+  /** True when the rules had to fill something in, so the row needs writing back. */
+  changed: boolean;
+}
+
+/**
+ * Applies the reminder rules to a whole deadlines array:
+ * dated entries get a reminder two days ahead, undated ones resurface three days
+ * after saving, and an empty array gains a single "saved item" resurface entry.
+ */
+export function normalizeDeadlines(deadlines: Deadline[], savedAtISO: string): NormalizedDeadlines {
+  if (deadlines.length === 0) {
+    return { deadlines: [defaultDeadlineFor(savedAtISO)], changed: true };
+  }
+
+  let changed = false;
+  const next = deadlines.map((deadline) => {
+    if (deadline.reminder_date) return deadline;
+    changed = true;
+    return {
+      ...deadline,
+      reminder_date: deadline.date ? reminderDateFor(deadline.date) : nudgeDateFrom(savedAtISO),
+    };
+  });
+
+  return { deadlines: next, changed };
 }
 
 export type DeadlinePatch = Partial<Pick<Deadline, 'date' | 'context' | 'reminder_date'>>;
@@ -97,13 +160,26 @@ export type DeadlinePatch = Partial<Pick<Deadline, 'date' | 'context' | 'reminde
 /**
  * Applies an edit to a single deadline, keeping the reminder anchored to the
  * date (and the user's chosen lead time) unless the reminder is set explicitly.
+ * Any change to the timing re-arms the reminders for that entry.
  */
-export function applyDeadlinePatch(deadline: Deadline, patch: DeadlinePatch): Deadline {
+export function applyDeadlinePatch(
+  deadline: Deadline,
+  patch: DeadlinePatch,
+  savedAtISO: string = new Date().toISOString(),
+): Deadline {
   const next: Deadline = { ...deadline, ...patch };
+
   if (patch.date !== undefined && patch.reminder_date === undefined) {
-    next.reminder_date = patch.date ? reminderDateFor(patch.date, leadDaysOf(deadline)) : null;
+    next.reminder_date = patch.date
+      ? reminderDateFor(patch.date, leadDaysOf(deadline))
+      : nudgeDateFrom(savedAtISO);
+  }
+
+  if (patch.date !== undefined || patch.reminder_date !== undefined) {
+    next.lead_reminder_sent = false;
     next.reminder_sent = false;
   }
+
   return next;
 }
 
@@ -115,6 +191,25 @@ export function sortDeadlines(deadlines: Deadline[]): Deadline[] {
     if (b.date) return 1;
     return a.context.localeCompare(b.context);
   });
+}
+
+/** Everything the AI or the user actually treats as a deadline. */
+export function realDeadlines(item: Item): Deadline[] {
+  return item.deadlines.filter((deadline) => !isResurfaceDeadline(deadline));
+}
+
+/** Deadlines that were mentioned in the post but have no date pinned down yet. */
+export function undatedDeadlines(item: Item): Deadline[] {
+  return realDeadlines(item).filter((deadline) => !isScheduled(deadline));
+}
+
+export function resurfaceDeadline(item: Item): Deadline | null {
+  return item.deadlines.find(isResurfaceDeadline) ?? null;
+}
+
+/** When an item with no deadline gets resurfaced. */
+export function resurfaceDateFor(item: Item): string {
+  return resurfaceDeadline(item)?.reminder_date ?? nudgeDateFor(item);
 }
 
 /** Nearest dated deadline that has not passed yet; falls back to the latest past one. */
@@ -132,20 +227,14 @@ export interface UpcomingDeadline {
   extraCount: number;
 }
 
-/** Gentle nudge date for items with no detected deadline. */
-export function nudgeDateFor(item: Item): string {
-  const saved = parseISO(item.saved_at);
-  const nudge = new Date(saved);
-  nudge.setDate(nudge.getDate() + DEFAULT_NUDGE_DAYS);
-  return nudge.toISOString();
-}
-
 /** Nearest deadline per item across the whole library, soonest first. */
 export function upcomingDeadlines(items: Item[], now: Date = new Date()): UpcomingDeadline[] {
   return items
     .map((item) => {
       const deadline = nearestDeadline(item, now);
-      return deadline ? { item, deadline, extraCount: item.deadlines.length - 1 } : null;
+      return deadline
+        ? { item, deadline, extraCount: Math.max(0, realDeadlines(item).length - 1) }
+        : null;
     })
     .filter((entry): entry is UpcomingDeadline => entry !== null)
     .sort((a, b) => a.deadline.date.localeCompare(b.deadline.date));

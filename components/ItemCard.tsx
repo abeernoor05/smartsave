@@ -5,7 +5,7 @@ import { Pressable, View } from 'react-native';
 import { DeadlineTag, NudgeTag, UnscheduledTag } from '@/components/DeadlineTag';
 import { Thumbnail } from '@/components/Thumbnail';
 import { CATEGORY_META, PLATFORM_META } from '@/lib/categories';
-import { nearestDeadline, nudgeDateFor, savedAgo } from '@/lib/deadlines';
+import { nearestDeadline, realDeadlines, resurfaceDateFor, savedAgo } from '@/lib/deadlines';
 import type { Item } from '@/lib/types';
 
 interface ItemCardProps {
@@ -17,6 +17,7 @@ interface ItemCardProps {
 /** Shared card used by folder view and search results. */
 export function ItemCard({ item, showCategory = false }: ItemCardProps) {
   const deadline = nearestDeadline(item);
+  const deadlineCount = realDeadlines(item).length;
   const platform = PLATFORM_META[item.platform];
   const category = CATEGORY_META[item.category];
   const PlatformIcon = platform.icon;
@@ -43,11 +44,11 @@ export function ItemCard({ item, showCategory = false }: ItemCardProps) {
 
             <View className="flex-row flex-wrap items-center gap-1.5">
               {deadline ? (
-                <DeadlineTag date={deadline.date} extraCount={item.deadlines.length - 1} />
-              ) : item.deadlines.length > 0 ? (
-                <UnscheduledTag extraCount={item.deadlines.length - 1} />
+                <DeadlineTag date={deadline.date} extraCount={deadlineCount - 1} />
+              ) : deadlineCount > 0 ? (
+                <UnscheduledTag extraCount={deadlineCount - 1} />
               ) : (
-                <NudgeTag date={nudgeDateFor(item)} />
+                <NudgeTag date={resurfaceDateFor(item)} />
               )}
             </View>
 

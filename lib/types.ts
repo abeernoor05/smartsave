@@ -23,8 +23,17 @@ export interface Deadline {
   date: string | null;
   /** Short explanation of what the date refers to. */
   context: string;
-  /** ISO date string of when the user should be reminded; null while undated. */
+  /**
+   * ISO date string of the next reminder for this entry: two days before a
+   * dated deadline, or `saved_at + 3 days` for an undated one.
+   */
   reminder_date: string | null;
+  /** True once the "two days before" reminder of a dated entry has been sent. */
+  lead_reminder_sent: boolean;
+  /**
+   * True once the final reminder of this entry has been sent — the same-day one
+   * for a dated deadline, the resurface nudge for an undated one.
+   */
   reminder_sent: boolean;
 }
 

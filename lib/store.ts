@@ -1,7 +1,14 @@
 import { create } from 'zustand';
 
 import { backendErrorMessage, bilt } from '@/lib/backend';
-import { applyDeadlinePatch, createDeadline, type DeadlinePatch } from '@/lib/deadlines';
+import {
+  applyDeadlinePatch,
+  createDeadline,
+  type DeadlinePatch,
+  isResurfaceDeadline,
+  normalizeDeadlines,
+} from '@/lib/deadlines';
+import type { ReminderMark } from '@/lib/reminders';
 import {
   type Category,
   type Deadline,
@@ -30,6 +37,8 @@ interface SmartSaveState {
   addDeadline: (itemId: string, date: string | null, context: string) => Promise<void>;
   updateDeadline: (itemId: string, deadlineId: string, patch: DeadlinePatch) => Promise<void>;
   removeDeadline: (itemId: string, deadlineId: string) => Promise<void>;
+  /** Flags the exact deadline entries whose reminders have just gone out. */
+  markRemindersSent: (marks: ReminderMark[]) => Promise<void>;
   setCategory: (itemId: string, category: Category) => Promise<void>;
   removeItem: (itemId: string) => Promise<void>;
   /** Drops the in-memory copy, e.g. on sign out. */
@@ -71,33 +80,59 @@ function parseDeadlines(value: unknown): Deadline[] {
         date,
         context: typeof raw.context === 'string' ? raw.context : '',
         reminder_date: reminder,
+        lead_reminder_sent: raw.lead_reminder_sent === true,
         reminder_sent: raw.reminder_sent === true,
       },
     ];
   });
 }
 
-/** Database row -> the Item shape the UI works with. */
-function toItem(row: ItemRow): Item {
-  const deadlines = parseDeadlines(row.deadlines);
+/** "Has a real deadline" ignores the placeholder resurface entry. */
+function hasRealDeadline(deadlines: Deadline[]): boolean {
+  return deadlines.some((deadline) => !isResurfaceDeadline(deadline));
+}
+
+/**
+ * Database row -> the Item shape the UI works with, with the reminder rules
+ * applied. `needsBackfill` means the rules filled something in, so the row
+ * should be written back.
+ */
+function toItem(row: ItemRow): { item: Item; needsBackfill: boolean } {
+  const { deadlines, changed } = normalizeDeadlines(parseDeadlines(row.deadlines), row.saved_at);
   return {
-    id: row.id,
-    original_url: row.original_url,
-    platform: isPlatform(row.platform) ? row.platform : 'other',
-    thumbnail_url: row.thumbnail_url ?? '',
-    caption_text: row.caption_text ?? '',
-    ocr_text: row.ocr_text ?? '',
-    ai_summary: row.ai_summary ?? '',
-    category: isCategory(row.category) ? row.category : 'General',
-    has_deadline: row.has_deadline ?? deadlines.length > 0,
-    deadlines,
-    confidence: isConfidence(row.confidence) ? row.confidence : 'medium',
-    saved_at: row.saved_at,
+    item: {
+      id: row.id,
+      original_url: row.original_url,
+      platform: isPlatform(row.platform) ? row.platform : 'other',
+      thumbnail_url: row.thumbnail_url ?? '',
+      caption_text: row.caption_text ?? '',
+      ocr_text: row.ocr_text ?? '',
+      ai_summary: row.ai_summary ?? '',
+      category: isCategory(row.category) ? row.category : 'General',
+      has_deadline: hasRealDeadline(deadlines),
+      deadlines,
+      confidence: isConfidence(row.confidence) ? row.confidence : 'medium',
+      saved_at: row.saved_at,
+    },
+    needsBackfill: changed,
   };
 }
 
 function withDeadlines(item: Item, deadlines: Deadline[]): Item {
-  return { ...item, deadlines, has_deadline: deadlines.length > 0 };
+  return { ...item, deadlines, has_deadline: hasRealDeadline(deadlines) };
+}
+
+/**
+ * Writes rules-filled deadlines back to Postgres. Best effort: the local copy is
+ * already correct and the same rules run again on the next load.
+ */
+async function backfillDeadlines(items: Item[]): Promise<void> {
+  for (const item of items) {
+    await bilt
+      .from(TABLE)
+      .update({ has_deadline: item.has_deadline, deadlines: item.deadlines })
+      .eq('id', item.id);
+  }
 }
 
 export const useSmartSaveStore = create<SmartSaveState>((set, get) => {
@@ -144,11 +179,16 @@ export const useSmartSaveStore = create<SmartSaveState>((set, get) => {
         return;
       }
 
+      const parsed = ((data ?? []) as ItemRow[]).map(toItem);
+
       set({
-        items: ((data ?? []) as ItemRow[]).map(toItem),
+        items: parsed.map((entry) => entry.item),
         status: 'ready',
         error: null,
       });
+
+      const backfill = parsed.filter((entry) => entry.needsBackfill).map((entry) => entry.item);
+      if (backfill.length > 0) void backfillDeadlines(backfill);
     },
 
     createItem: async (input) => {
@@ -167,7 +207,7 @@ export const useSmartSaveStore = create<SmartSaveState>((set, get) => {
           ocr_text: input.ocr_text,
           ai_summary: input.ai_summary,
           category: input.category,
-          has_deadline: input.deadlines.length > 0,
+          has_deadline: hasRealDeadline(input.deadlines),
           deadlines: input.deadlines,
           confidence: input.confidence,
         })
@@ -178,14 +218,20 @@ export const useSmartSaveStore = create<SmartSaveState>((set, get) => {
         throw new Error(backendErrorMessage(error, 'Could not save this link.'));
       }
 
-      const item = toItem(data);
+      // A save with no deadlines gains its resurface entry here, using the
+      // server's saved_at so the nudge lands exactly three days later.
+      const { item, needsBackfill } = toItem(data);
       set((state) => ({ items: [item, ...state.items], status: 'ready', error: null }));
+      if (needsBackfill) void backfillDeadlines([item]);
       return item;
     },
 
     addDeadline: async (itemId, date, context) => {
       await persist(itemId, (item) =>
-        withDeadlines(item, [...item.deadlines, createDeadline(date, context)]),
+        withDeadlines(item, [
+          ...item.deadlines.filter((deadline) => !isResurfaceDeadline(deadline)),
+          createDeadline(date, context, item.saved_at),
+        ]),
       );
     },
 
@@ -194,19 +240,50 @@ export const useSmartSaveStore = create<SmartSaveState>((set, get) => {
         withDeadlines(
           item,
           item.deadlines.map((deadline) =>
-            deadline.id === deadlineId ? applyDeadlinePatch(deadline, patch) : deadline,
+            deadline.id === deadlineId
+              ? applyDeadlinePatch(deadline, patch, item.saved_at)
+              : deadline,
           ),
         ),
       );
     },
 
     removeDeadline: async (itemId, deadlineId) => {
-      await persist(itemId, (item) =>
-        withDeadlines(
-          item,
-          item.deadlines.filter((deadline) => deadline.id !== deadlineId),
-        ),
-      );
+      await persist(itemId, (item) => {
+        const kept = item.deadlines.filter((deadline) => deadline.id !== deadlineId);
+        return withDeadlines(item, normalizeDeadlines(kept, item.saved_at).deadlines);
+      });
+    },
+
+    markRemindersSent: async (marks) => {
+      const byItem = new Map<string, ReminderMark[]>();
+      for (const mark of marks) {
+        const list = byItem.get(mark.itemId);
+        if (list) list.push(mark);
+        else byItem.set(mark.itemId, [mark]);
+      }
+
+      for (const [itemId, itemMarks] of byItem) {
+        await persist(itemId, (item) =>
+          withDeadlines(
+            item,
+            item.deadlines.map((deadline) => {
+              const stages = itemMarks
+                .filter((mark) => mark.deadlineId === deadline.id)
+                .map((mark) => mark.stage);
+              if (stages.length === 0) return deadline;
+              const sameDay = stages.includes('day');
+              return {
+                ...deadline,
+                // A same-day reminder means the lead window is behind us too.
+                lead_reminder_sent:
+                  deadline.lead_reminder_sent || stages.includes('lead') || sameDay,
+                reminder_sent: deadline.reminder_sent || sameDay || stages.includes('nudge'),
+              };
+            }),
+          ),
+        );
+      }
     },
 
     setCategory: async (itemId, category) => {

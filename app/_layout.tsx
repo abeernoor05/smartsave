@@ -26,7 +26,9 @@ import { initPostHog } from '@/lib/posthog';
 import { registerServiceWorker } from '@/lib/registerServiceWorker';
 import { reportErrorToParent } from '@/lib/reportPreviewError';
 import { AuthProvider, useAuth } from '@/lib/auth';
+import { clearScheduledReminders } from '@/lib/reminders';
 import { useSmartSaveStore } from '@/lib/store';
+import { useReminderSync } from '@/hooks/useReminderSync';
 import { InstallPrompt } from '@/components/InstallPrompt';
 import { SignInScreen } from '@/components/SignInScreen';
 
@@ -88,11 +90,14 @@ function AuthGate() {
   const loadItems = useSmartSaveStore((state) => state.loadItems);
   const clearItems = useSmartSaveStore((state) => state.clear);
 
+  useReminderSync(userId !== null);
+
   useEffect(() => {
     if (userId) {
       void loadItems();
     } else {
       clearItems();
+      void clearScheduledReminders();
     }
   }, [userId, loadItems, clearItems]);
 

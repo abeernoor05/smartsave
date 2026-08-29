@@ -15,7 +15,7 @@ import {
 } from '@/lib/deadlines';
 import type { Deadline } from '@/lib/types';
 
-const LEAD_OPTIONS = [1, 3, 7] as const;
+const LEAD_OPTIONS = [1, 2, 3, 7] as const;
 const SHIFTS = [
   { label: '−1w', days: -7 },
   { label: '−1d', days: -1 },
@@ -109,19 +109,34 @@ export function DeadlineListItem({
       </View>
 
       {deadline.date && deadline.reminder_date ? (
-        <View className="bg-surface-secondary rounded-xl px-3 py-2">
+        <View className="bg-surface-secondary gap-1 rounded-xl px-3 py-2">
+          {leadDays > 0 ? (
+            <Typography type="body-xs" color="muted">
+              {`Reminder ${leadDays === 1 ? '1 day' : `${leadDays} days`} before · ${formatDate(deadline.reminder_date)}${
+                deadline.lead_reminder_sent ? ' · sent' : ''
+              }`}
+            </Typography>
+          ) : null}
           <Typography type="body-xs" color="muted">
-            {leadDays === 0
-              ? `Reminder on the day · ${formatDate(deadline.reminder_date)}`
-              : `Reminder ${leadDays === 1 ? '1 day' : `${leadDays} days`} before · ${formatDate(deadline.reminder_date)}`}
-            {deadline.reminder_sent ? ' · already sent' : ''}
+            {`Reminder on the day · ${formatDate(deadline.date)}${deadline.reminder_sent ? ' · sent' : ''}`}
           </Typography>
         </View>
       ) : (
-        <Button size="sm" variant="secondary" onPress={giveItADate}>
-          <CalendarPlus size={14} color="#4F46E5" />
-          <Button.Label>Set a date</Button.Label>
-        </Button>
+        <View className="gap-2">
+          {deadline.reminder_date ? (
+            <View className="bg-surface-secondary rounded-xl px-3 py-2">
+              <Typography type="body-xs" color="muted">
+                {`No date yet — this resurfaces on ${formatDate(deadline.reminder_date)}${
+                  deadline.reminder_sent ? ' · sent' : ''
+                }`}
+              </Typography>
+            </View>
+          ) : null}
+          <Button size="sm" variant="secondary" onPress={giveItADate}>
+            <CalendarPlus size={14} color="#4F46E5" />
+            <Button.Label>Set a date</Button.Label>
+          </Button>
+        </View>
       )}
 
       {isEditing ? (

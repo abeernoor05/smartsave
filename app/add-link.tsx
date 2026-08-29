@@ -26,7 +26,13 @@ import { CategoryPicker } from '@/components/CategoryPicker';
 import { DeadlineListItem } from '@/components/DeadlineListItem';
 import { Thumbnail } from '@/components/Thumbnail';
 import { PLATFORM_META } from '@/lib/categories';
-import { applyDeadlinePatch, createDeadline, type DeadlinePatch } from '@/lib/deadlines';
+import {
+  applyDeadlinePatch,
+  createDeadline,
+  type DeadlinePatch,
+  REMINDER_LEAD_DAYS,
+  UNDATED_NUDGE_DAYS,
+} from '@/lib/deadlines';
 import {
   ANALYSIS_STAGES,
   analyzeLink,
@@ -380,11 +386,18 @@ export default function AddLinkScreen() {
 
                 <View className="gap-3">
                   <View className="flex-row items-center justify-between">
-                    <Typography type="body-sm" weight="semibold">
-                      {draft.deadlines.length > 0
-                        ? `Deadlines found (${draft.deadlines.length})`
-                        : 'No deadline found'}
-                    </Typography>
+                    <View className="flex-1">
+                      <Typography type="body-sm" weight="semibold">
+                        {draft.deadlines.length > 0
+                          ? `Deadlines found (${draft.deadlines.length})`
+                          : 'No deadline found'}
+                      </Typography>
+                      {draft.deadlines.length > 0 ? (
+                        <Typography type="body-xs" color="muted">
+                          {`Each one reminds you ${REMINDER_LEAD_DAYS} days before and again on the day.`}
+                        </Typography>
+                      ) : null}
+                    </View>
                     <Button size="sm" variant="secondary" onPress={addDraftDeadline}>
                       <Plus size={14} color="#4F46E5" />
                       <Button.Label>Add</Button.Label>
@@ -402,7 +415,7 @@ export default function AddLinkScreen() {
                     ))
                   ) : (
                     <Typography type="body-xs" color="muted">
-                      Nothing time-sensitive in this post, so SmartSave will nudge you in a week.
+                      {`Nothing time-sensitive in this post, so SmartSave resurfaces it in ${UNDATED_NUDGE_DAYS} days.`}
                     </Typography>
                   )}
                 </View>

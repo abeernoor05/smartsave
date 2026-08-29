@@ -13,9 +13,15 @@ create table if not exists items (
   ocr_text text,
   ai_summary text,
   category text not null default 'General' check (category in ('Career', 'Travel', 'Finance', 'Learning', 'General')),
+  -- True only when a real deadline was found; the "saved item" resurface entry does not count.
   has_deadline boolean not null default false,
-  -- Each entry: { id, date, context, reminder_date, reminder_sent }
-  -- date / reminder_date are null when a deadline was mentioned but not resolvable.
+  -- Each entry: { id, date, context, reminder_date, lead_reminder_sent, reminder_sent }
+  -- date is null when a deadline was mentioned but not resolvable.
+  -- reminder_date is the next reminder for that entry: two days before a dated
+  -- deadline, or saved_at + 3 days for an undated one. A dated entry fires twice —
+  -- lead_reminder_sent covers the "two days before" one, reminder_sent the same-day
+  -- one; for undated entries reminder_sent covers the single resurface nudge.
+  -- Items with no deadline at all carry one entry with context 'saved item'.
   deadlines jsonb not null default '[]'::jsonb,
   confidence text not null default 'medium' check (confidence in ('high', 'medium', 'low')),
   saved_at timestamptz not null default now()

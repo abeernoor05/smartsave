@@ -2,7 +2,15 @@ import { addDays } from 'date-fns';
 import * as Linking from 'expo-linking';
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { Button, Card, Chip, Separator, Typography } from 'heroui-native';
-import { BellRing, ExternalLink, FileQuestion, Plus, ScanText, Trash2 } from 'lucide-react-native';
+import {
+  BellRing,
+  ExternalLink,
+  FileQuestion,
+  Plus,
+  ScanText,
+  StickyNote,
+  Trash2,
+} from 'lucide-react-native';
 import { Pressable, ScrollView, useWindowDimensions, View } from 'react-native';
 import { useMemo, useState } from 'react';
 
@@ -12,11 +20,14 @@ import { EmptyState } from '@/components/EmptyState';
 import { Thumbnail } from '@/components/Thumbnail';
 import { PLATFORM_META } from '@/lib/categories';
 import {
-  DEFAULT_NUDGE_DAYS,
   formatDate,
-  nudgeDateFor,
+  realDeadlines,
+  REMINDER_LEAD_DAYS,
+  resurfaceDateFor,
   savedAgo,
   sortDeadlines,
+  undatedDeadlines,
+  UNDATED_NUDGE_DAYS,
 } from '@/lib/deadlines';
 import { goBackOrReplace } from '@/lib/navigation';
 import { getItemById, useSmartSaveStore } from '@/lib/store';
@@ -45,7 +56,8 @@ export default function ItemDetailScreen() {
   const [isCaptionExpanded, setIsCaptionExpanded] = useState(false);
 
   const item = getItemById(items, params.id);
-  const deadlines = useMemo(() => (item ? sortDeadlines(item.deadlines) : []), [item]);
+  const deadlines = useMemo(() => (item ? sortDeadlines(realDeadlines(item)) : []), [item]);
+  const undated = useMemo(() => (item ? undatedDeadlines(item) : []), [item]);
 
   if (!item) {
     return (
@@ -100,6 +112,29 @@ export default function ItemDetailScreen() {
           <Typography type="body">{item.ai_summary}</Typography>
         </Card>
 
+        {undated.length > 0 ? (
+          <Card className="gap-3 p-4">
+            <View className="flex-row items-center gap-2">
+              <StickyNote size={14} color="#BC7011" />
+              <Typography type="body-xs" weight="semibold" color="muted">
+                MENTIONED, NO DATE YET
+              </Typography>
+            </View>
+            {undated.map((deadline) => (
+              <View key={deadline.id} className="gap-0.5">
+                <Typography type="body-sm" weight="medium">
+                  {deadline.context || 'Deadline'}
+                </Typography>
+                <Typography type="body-xs" color="muted">
+                  {deadline.reminder_date
+                    ? `Resurfaces on ${formatDate(deadline.reminder_date)} — set a date below for a proper reminder.`
+                    : 'Set a date below to get a reminder.'}
+                </Typography>
+              </View>
+            ))}
+          </Card>
+        ) : null}
+
         {storeError ? (
           <Typography type="body-xs" className="text-urgent">
             {storeError}
@@ -118,9 +153,16 @@ export default function ItemDetailScreen() {
 
         <View className="gap-3">
           <View className="flex-row items-center justify-between">
-            <Typography type="body" weight="semibold">
-              {deadlines.length > 0 ? `Deadlines (${deadlines.length})` : 'Deadlines'}
-            </Typography>
+            <View className="flex-1">
+              <Typography type="body" weight="semibold">
+                {deadlines.length > 0 ? `Deadlines (${deadlines.length})` : 'Deadlines'}
+              </Typography>
+              {deadlines.length > 0 ? (
+                <Typography type="body-xs" color="muted">
+                  {`Each date reminds you ${REMINDER_LEAD_DAYS} days before and again on the day.`}
+                </Typography>
+              ) : null}
+            </View>
             <Button
               size="sm"
               variant="secondary"
@@ -152,7 +194,7 @@ export default function ItemDetailScreen() {
                   No deadline detected
                 </Typography>
                 <Typography type="body-xs" color="muted">
-                  {`SmartSave will nudge you on ${formatDate(nudgeDateFor(item))}, ${DEFAULT_NUDGE_DAYS} days after saving, so this does not get forgotten.`}
+                  {`SmartSave will resurface this on ${formatDate(resurfaceDateFor(item))}, ${UNDATED_NUDGE_DAYS} days after saving, so it does not get forgotten.`}
                 </Typography>
               </View>
             </Card>
