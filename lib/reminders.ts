@@ -1,6 +1,4 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import * as Notifications from 'expo-notifications';
-import { Platform } from 'react-native';
 
 import {
   formatShortDate,
@@ -9,6 +7,8 @@ import {
   leadDaysOf,
   relativeDeadlineLabel,
 } from '@/lib/deadlines';
+import { notifications } from '@/lib/notifications';
+import type { NotificationContent } from '@/lib/notifications.types';
 import type { Deadline, Item } from '@/lib/types';
 
 const STORAGE_KEY = 'smartsave.scheduled-reminders.v1';
@@ -17,19 +17,7 @@ const CHANNEL_ID = 'deadline-reminders';
 const STALE_AFTER_DAYS = 14;
 const DAY_MS = 24 * 60 * 60 * 1000;
 
-const isSupported = Platform.OS !== 'web';
-
-if (isSupported) {
-  Notifications.setNotificationHandler({
-    handleNotification: () =>
-      Promise.resolve({
-        shouldShowBanner: true,
-        shouldShowList: true,
-        shouldPlaySound: true,
-        shouldSetBadge: false,
-      }),
-  });
-}
+const isSupported = notifications.isSupported;
 
 /**
  * Each deadline entry can fire more than once:
@@ -201,23 +189,14 @@ async function writeScheduled(map: ScheduledMap): Promise<void> {
 }
 
 async function ensurePermission(): Promise<boolean> {
-  const current = await Notifications.getPermissionsAsync();
-  if (current.granted) return true;
-  if (!current.canAskAgain) return false;
-  const requested = await Notifications.requestPermissionsAsync();
-  return requested.granted;
+  return await notifications.ensurePermission();
 }
 
 async function ensureChannel(): Promise<void> {
-  if (Platform.OS !== 'android') return;
-  await Notifications.setNotificationChannelAsync(CHANNEL_ID, {
-    name: 'Deadline reminders',
-    importance: Notifications.AndroidImportance.HIGH,
-    vibrationPattern: [0, 250, 250, 250],
-  });
+  await notifications.ensureChannel(CHANNEL_ID, 'Deadline reminders');
 }
 
-function contentOf(reminder: Reminder): Notifications.NotificationContentInput {
+function contentOf(reminder: Reminder): NotificationContent {
   return {
     title: reminder.title,
     body: reminder.body,
@@ -231,29 +210,15 @@ function contentOf(reminder: Reminder): Notifications.NotificationContentInput {
 }
 
 async function presentNow(reminder: Reminder): Promise<void> {
-  await Notifications.scheduleNotificationAsync({
-    content: contentOf(reminder),
-    trigger: null,
-  });
+  await notifications.present(contentOf(reminder));
 }
 
 async function scheduleAt(reminder: Reminder): Promise<string> {
-  return await Notifications.scheduleNotificationAsync({
-    content: contentOf(reminder),
-    trigger: {
-      type: Notifications.SchedulableTriggerInputTypes.DATE,
-      date: new Date(reminder.fireAt),
-      channelId: CHANNEL_ID,
-    },
-  });
+  return await notifications.scheduleAt(contentOf(reminder), new Date(reminder.fireAt), CHANNEL_ID);
 }
 
 async function cancel(identifier: string): Promise<void> {
-  try {
-    await Notifications.cancelScheduledNotificationAsync(identifier);
-  } catch {
-    // Already delivered or cancelled — nothing left to do.
-  }
+  await notifications.cancel(identifier);
 }
 
 /**
@@ -337,10 +302,6 @@ export async function syncReminders(
 /** Drops every queued reminder, e.g. when the user signs out. */
 export async function clearScheduledReminders(): Promise<void> {
   if (!isSupported) return;
-  try {
-    await Notifications.cancelAllScheduledNotificationsAsync();
-  } catch {
-    // Nothing scheduled.
-  }
+  await notifications.cancelAll();
   await writeScheduled({});
 }

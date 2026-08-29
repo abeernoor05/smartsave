@@ -1,8 +1,8 @@
-import * as Notifications from 'expo-notifications';
 import { router } from 'expo-router';
 import { AppState, Platform } from 'react-native';
 import { useEffect, useMemo } from 'react';
 
+import { notifications } from '@/lib/notifications';
 import { itemIdFromNotification, syncReminders } from '@/lib/reminders';
 import { useSmartSaveStore } from '@/lib/store';
 import type { Item } from '@/lib/types';
@@ -73,18 +73,17 @@ export function useReminderSync(enabled: boolean): void {
   }, [enabled]);
 
   useEffect(() => {
-    if (!enabled || Platform.OS === 'web') return undefined;
+    if (!enabled || !notifications.isSupported) return undefined;
 
     // Cold start from a tapped reminder.
-    void Notifications.getLastNotificationResponseAsync().then((response) => {
-      const itemId = itemIdFromNotification(response?.notification.request.content.data);
+    void notifications.lastTappedData().then((data) => {
+      const itemId = itemIdFromNotification(data);
       if (itemId) openItem(itemId);
     });
 
-    const subscription = Notifications.addNotificationResponseReceivedListener((response) => {
-      const itemId = itemIdFromNotification(response.notification.request.content.data);
+    return notifications.onTap((data) => {
+      const itemId = itemIdFromNotification(data);
       if (itemId) openItem(itemId);
     });
-    return () => subscription.remove();
   }, [enabled]);
 }
