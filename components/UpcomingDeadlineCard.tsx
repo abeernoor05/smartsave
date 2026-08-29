@@ -3,6 +3,7 @@ import { Card, Typography } from 'heroui-native';
 import { Pressable, View } from 'react-native';
 
 import { CATEGORY_META } from '@/lib/categories';
+import { COLORS } from '@/lib/colors';
 import {
   formatShortDate,
   relativeDeadlineLabel,
@@ -19,19 +20,18 @@ interface UpcomingDeadlineCardProps {
 export function UpcomingDeadlineCard({ entry }: UpcomingDeadlineCardProps) {
   const { item, deadline, extraCount } = entry;
   const styles = URGENCY_STYLES[urgencyOf(deadline.date)];
-  const meta = CATEGORY_META[item.category];
-  const Icon = meta.icon;
+  const Icon = CATEGORY_META[item.category].icon;
 
   return (
     <Pressable
       accessibilityRole="button"
       className="w-64"
       onPress={() => router.push({ pathname: '/item/[id]', params: { id: item.id } })}
-      style={({ pressed }) => ({ opacity: pressed ? 0.85 : 1 })}
+      style={({ pressed }) => ({ opacity: pressed ? 0.9 : 1 })}
     >
-      <Card className="gap-3 p-4">
+      <Card className="border-border gap-3 border p-4">
         <View className="flex-row items-center justify-between">
-          <View className={`rounded-full px-2 py-1 ${styles.bgClass}`}>
+          <View className={`rounded-full px-2.5 py-1 ${styles.bgClass}`}>
             <Typography type="body-xs" weight="semibold" className={styles.textClass}>
               {relativeDeadlineLabel(deadline.date)}
             </Typography>
@@ -41,7 +41,7 @@ export function UpcomingDeadlineCard({ entry }: UpcomingDeadlineCardProps) {
           </Typography>
         </View>
 
-        <Typography type="body-sm" weight="semibold" numberOfLines={1}>
+        <Typography type="body-sm" weight="bold" numberOfLines={1}>
           {deadline.context}
         </Typography>
         <Typography type="body-xs" color="muted" numberOfLines={2}>
@@ -49,16 +49,14 @@ export function UpcomingDeadlineCard({ entry }: UpcomingDeadlineCardProps) {
         </Typography>
 
         <View className="flex-row items-center gap-2">
-          <View
-            className={`flex-row items-center gap-1 rounded-full px-2 py-1 ${meta.chipBgClass}`}
-          >
-            <Icon size={12} color={meta.color} />
-            <Typography type="body-xs" weight="medium" className={meta.chipTextClass}>
+          <View className="bg-surface-secondary flex-row items-center gap-1 rounded-full px-2 py-1">
+            <Icon size={12} color={COLORS.accent} />
+            <Typography type="body-xs" weight="medium" color="muted">
               {item.category}
             </Typography>
           </View>
           {extraCount > 0 ? (
-            <Typography type="body-xs" color="muted">
+            <Typography type="body-xs" color="muted" numberOfLines={1} className="flex-1">
               {`+${extraCount} more on this item`}
             </Typography>
           ) : null}

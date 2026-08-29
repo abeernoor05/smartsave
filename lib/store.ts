@@ -327,18 +327,42 @@ export function searchItems(items: Item[], query: string): Item[] {
   if (!needle) return [];
   return items
     .filter((item) => {
-      const haystack = [
-        item.ai_summary,
-        item.caption_text,
-        item.ocr_text,
-        item.category,
-        item.platform,
-        item.original_url,
-        ...item.deadlines.map((deadline) => deadline.context),
-      ]
-        .join(' ')
-        .toLowerCase();
+      const haystack = [item.ai_summary, item.caption_text, item.category].join(' ').toLowerCase();
       return haystack.includes(needle);
     })
     .sort((a, b) => b.saved_at.localeCompare(a.saved_at));
+}
+
+/**
+ * PostgREST `or` filters are comma separated and use `*` as the wildcard, so
+ * characters that would break the filter string are dropped from the needle.
+ */
+function searchPattern(query: string): string | null {
+  const cleaned = query
+    .replace(/["'%(),*\\]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  return cleaned.length === 0 ? null : `*${cleaned}*`;
+}
+
+/**
+ * Searches the items table itself across caption_text, ai_summary and category.
+ * Row-level rules keep the results scoped to the signed-in user.
+ */
+export async function searchItemsInDatabase(query: string): Promise<Item[]> {
+  const pattern = searchPattern(query);
+  if (!pattern) return [];
+
+  const { data, error } = await bilt
+    .from(TABLE)
+    .select(SELECT_COLUMNS)
+    .or(`caption_text.ilike.${pattern},ai_summary.ilike.${pattern},category.ilike.${pattern}`)
+    .order('saved_at', { ascending: false })
+    .limit(100);
+
+  if (error) {
+    throw new Error(backendErrorMessage(error, 'Could not search your saved links.'));
+  }
+
+  return ((data ?? []) as ItemRow[]).map((row) => toItem(row).item);
 }

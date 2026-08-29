@@ -19,6 +19,7 @@ import { DeadlineListItem } from '@/components/DeadlineListItem';
 import { EmptyState } from '@/components/EmptyState';
 import { Thumbnail } from '@/components/Thumbnail';
 import { PLATFORM_META } from '@/lib/categories';
+import { COLORS } from '@/lib/colors';
 import {
   formatDate,
   realDeadlines,
@@ -92,7 +93,7 @@ export default function ItemDetailScreen() {
 
         <View className="flex-row flex-wrap items-center gap-2">
           <View className="bg-surface-secondary flex-row items-center gap-1.5 rounded-full px-2.5 py-1">
-            <PlatformIcon size={12} color="#6A7080" />
+            <PlatformIcon size={12} color={COLORS.muted} />
             <Typography type="body-xs" weight="medium" color="muted">
               {platform.label}
             </Typography>
@@ -105,7 +106,7 @@ export default function ItemDetailScreen() {
           </Typography>
         </View>
 
-        <Card className="gap-2 p-4">
+        <Card className="border-border gap-2 border p-4">
           <Typography type="body-xs" weight="semibold" color="muted">
             AI SUMMARY
           </Typography>
@@ -113,16 +114,16 @@ export default function ItemDetailScreen() {
         </Card>
 
         {undated.length > 0 ? (
-          <Card className="gap-3 p-4">
+          <Card className="border-border gap-3 border p-4">
             <View className="flex-row items-center gap-2">
-              <StickyNote size={14} color="#BC7011" />
+              <StickyNote size={14} color={COLORS.soon} />
               <Typography type="body-xs" weight="semibold" color="muted">
                 MENTIONED, NO DATE YET
               </Typography>
             </View>
             {undated.map((deadline) => (
               <View key={deadline.id} className="gap-0.5">
-                <Typography type="body-sm" weight="medium">
+                <Typography type="body-sm" weight="bold">
                   {deadline.context || 'Deadline'}
                 </Typography>
                 <Typography type="body-xs" color="muted">
@@ -142,7 +143,7 @@ export default function ItemDetailScreen() {
         ) : null}
 
         <View className="gap-2">
-          <Typography type="body" weight="semibold">
+          <Typography type="body" weight="bold">
             Folder
           </Typography>
           <CategoryPicker
@@ -154,7 +155,7 @@ export default function ItemDetailScreen() {
         <View className="gap-3">
           <View className="flex-row items-center justify-between">
             <View className="flex-1">
-              <Typography type="body" weight="semibold">
+              <Typography type="body" weight="bold">
                 {deadlines.length > 0 ? `Deadlines (${deadlines.length})` : 'Deadlines'}
               </Typography>
               {deadlines.length > 0 ? (
@@ -170,7 +171,7 @@ export default function ItemDetailScreen() {
                 void addDeadline(item.id, addDays(new Date(), 7).toISOString(), 'Follow up')
               }
             >
-              <Plus size={14} color="#4F46E5" />
+              <Plus size={14} color={COLORS.accent} />
               <Button.Label>Add</Button.Label>
             </Button>
           </View>
@@ -185,12 +186,12 @@ export default function ItemDetailScreen() {
               />
             ))
           ) : (
-            <Card className="flex-row items-start gap-3 p-4">
+            <Card className="border-border flex-row items-start gap-3 border p-4">
               <View className="bg-surface-secondary size-10 items-center justify-center rounded-xl">
-                <BellRing size={18} color="#6A7080" />
+                <BellRing size={18} color={COLORS.muted} />
               </View>
               <View className="flex-1 gap-1">
-                <Typography type="body-sm" weight="medium">
+                <Typography type="body-sm" weight="bold">
                   No deadline detected
                 </Typography>
                 <Typography type="body-xs" color="muted">
@@ -201,7 +202,7 @@ export default function ItemDetailScreen() {
           )}
         </View>
 
-        <Card className="gap-3 p-4">
+        <Card className="border-border gap-3 border p-4">
           <Typography type="body-xs" weight="semibold" color="muted">
             ORIGINAL CAPTION
           </Typography>
@@ -224,7 +225,7 @@ export default function ItemDetailScreen() {
               <Separator />
               <View className="gap-1.5">
                 <View className="flex-row items-center gap-2">
-                  <ScanText size={14} color="#6A7080" />
+                  <ScanText size={14} color={COLORS.muted} />
                   <Typography type="body-xs" weight="semibold" color="muted">
                     TEXT FOUND IN IMAGE
                   </Typography>
@@ -239,7 +240,7 @@ export default function ItemDetailScreen() {
 
         <View className="gap-3">
           <Button onPress={() => void Linking.openURL(item.original_url)}>
-            <ExternalLink size={16} color="#FFFFFF" />
+            <ExternalLink size={16} color={COLORS.onAccent} />
             <Button.Label>Open original link</Button.Label>
           </Button>
           <Typography type="body-xs" color="muted" align="center" numberOfLines={1}>
@@ -253,7 +254,7 @@ export default function ItemDetailScreen() {
               goBackOrReplace('/');
             }}
           >
-            <Trash2 size={16} color="#C4382E" />
+            <Trash2 size={16} color={COLORS.urgent} />
             <Button.Label>Remove from SmartSave</Button.Label>
           </Button>
         </View>

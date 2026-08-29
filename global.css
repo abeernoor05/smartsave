@@ -6,74 +6,89 @@
 @import 'heroui-native/styles';
 
 /*
- * HeroUI Native + Uniwind tokens
+ * SmartSave theme — minimal, card-based, light neutral.
  *
- * HeroUI component variants compile to semantic utilities such as bg-accent,
- * text-accent-foreground, bg-default, and text-foreground. The imported
- * heroui-native/styles package defines the default semantic theme and maps it
- * to --color-* Tailwind utilities.
+ * Brand accent is a deep blue. Everything structural is neutral grey:
+ * a soft grey app background with white cards and hairline borders.
+ * Colour is reserved for the accent and for deadline urgency.
  *
- * When changing brand colors, override semantic tokens inside Uniwind theme
- * variants. Do not put --accent only in a plain :root block: web may look
- * correct through CSS cascade order while Expo Go/native keeps HeroUI's
- * default blue from the active light/dark theme table.
+ * Semantic token overrides must live inside the Uniwind light/dark theme
+ * variants, otherwise native keeps HeroUI's default blue.
  *
- * Example:
- *
- * @layer theme {
- *   :root {
- *     @variant light {
- *       --accent: oklch(0.63 0.18 148);
- *       --accent-foreground: oklch(0.99 0 0);
- *       --focus: var(--accent);
- *     }
- *
- *     @variant dark {
- *       --accent: oklch(0.63 0.18 148);
- *       --accent-foreground: oklch(0.99 0 0);
- *       --focus: var(--accent);
- *     }
- *   }
- * }
+ * Hex mirrors of these values live in lib/colors.ts for icon and other
+ * native colour props that cannot read a className.
  */
 
 @layer theme {
   :root {
     @variant light {
-      --accent: oklch(0.53 0.19 277);
-      --accent-foreground: oklch(0.99 0 0);
-      --accent-soft: oklch(0.95 0.03 277);
+      /* Base */
+      --background: oklch(0.97 0.003 265);
+      --foreground: oklch(0.24 0.02 265);
+
+      --surface: oklch(1 0 0);
+      --surface-foreground: var(--foreground);
+      --surface-secondary: oklch(0.955 0.004 265);
+      --surface-secondary-foreground: var(--foreground);
+      --surface-tertiary: oklch(0.925 0.006 265);
+      --surface-tertiary-foreground: var(--foreground);
+
+      --overlay: oklch(1 0 0);
+      --overlay-foreground: var(--foreground);
+
+      --muted: oklch(0.55 0.02 262);
+      --default: oklch(0.955 0.004 265);
+      --default-foreground: var(--foreground);
+
+      /* Brand — deep blue */
+      --accent: oklch(0.42 0.17 264);
+      --accent-foreground: oklch(1 0 0);
       --focus: var(--accent);
+      --link: var(--accent);
+
+      /* Fields */
+      --field-background: oklch(0.97 0.003 265);
+      --field-foreground: var(--foreground);
+      --field-placeholder: var(--muted);
+      --field-border: oklch(0.92 0.005 265);
+
+      /* Status — aligned with the deadline palette */
+      --danger: oklch(0.5 0.19 28);
+      --danger-foreground: oklch(1 0 0);
+      --warning: oklch(0.45 0.12 60);
+      --warning-foreground: oklch(1 0 0);
+
+      /* Lines */
+      --border: oklch(0.92 0.005 265);
+      --separator: oklch(0.9 0.006 265);
+
+      /* Soft, single-layer card shadow */
+      --surface-shadow: 0 1px 2px 0 rgba(16, 24, 40, 0.04), 0 0 1px 0 rgba(16, 24, 40, 0.06);
+      --field-shadow: 0 1px 2px 0 rgba(16, 24, 40, 0.03);
     }
 
     @variant dark {
-      --accent: oklch(0.53 0.19 277);
-      --accent-foreground: oklch(0.99 0 0);
-      --accent-soft: oklch(0.28 0.06 277);
+      --accent: oklch(0.55 0.17 264);
+      --accent-foreground: oklch(1 0 0);
       --focus: var(--accent);
+      --link: var(--accent);
     }
   }
 }
 
-/* Category + urgency palette for SmartSave folders and deadline tags. */
+/*
+ * Deadline urgency palette.
+ * urgent = red   → overdue, today, or within three days
+ * soon   = amber → further out, or a deadline with no date confirmed yet
+ * calm   = grey  → items with no deadline at all
+ */
 @theme {
-  --color-cat-career: oklch(0.53 0.19 277);
-  --color-cat-career-soft: oklch(0.95 0.035 277);
-  --color-cat-travel: oklch(0.57 0.12 213);
-  --color-cat-travel-soft: oklch(0.95 0.035 213);
-  --color-cat-finance: oklch(0.53 0.13 157);
-  --color-cat-finance-soft: oklch(0.95 0.035 157);
-  --color-cat-learning: oklch(0.62 0.15 62);
-  --color-cat-learning-soft: oklch(0.95 0.045 62);
-  --color-cat-general: oklch(0.53 0.07 305);
-  --color-cat-general-soft: oklch(0.95 0.025 305);
-
-  --color-urgent: oklch(0.55 0.2 25);
-  --color-urgent-soft: oklch(0.95 0.04 25);
-  --color-soon: oklch(0.6 0.15 62);
-  --color-soon-soft: oklch(0.96 0.05 62);
-  --color-calm: oklch(0.5 0.03 260);
-  --color-calm-soft: oklch(0.96 0.008 260);
+  --color-urgent: oklch(0.5 0.19 28);
+  --color-urgent-soft: oklch(0.955 0.025 25);
+  --color-soon: oklch(0.45 0.12 60);
+  --color-soon-soft: oklch(0.96 0.06 95);
+  --color-calm: oklch(0.45 0.02 262);
+  --color-calm-soft: oklch(0.925 0.006 265);
 }
 
 @source './node_modules/heroui-native/lib';

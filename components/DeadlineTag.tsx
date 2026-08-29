@@ -2,8 +2,30 @@ import { CalendarClock } from 'lucide-react-native';
 import { View } from 'react-native';
 import { Typography } from 'heroui-native';
 
-import { formatShortDate, relativeDeadlineLabel, URGENCY_STYLES, urgencyOf } from '@/lib/deadlines';
+import {
+  formatShortDate,
+  NO_DEADLINE_STYLE,
+  relativeDeadlineLabel,
+  UNCONFIRMED_STYLE,
+  URGENCY_STYLES,
+  urgencyOf,
+} from '@/lib/deadlines';
 import { cn } from '@/lib/utils';
+
+interface ExtraCountProps {
+  count: number;
+}
+
+function ExtraCount({ count }: ExtraCountProps) {
+  if (count <= 0) return null;
+  return (
+    <View className="bg-surface-secondary rounded-full px-2 py-1">
+      <Typography type="body-xs" weight="medium" color="muted">
+        {`+${count}`}
+      </Typography>
+    </View>
+  );
+}
 
 interface DeadlineTagProps {
   date: string;
@@ -12,26 +34,19 @@ interface DeadlineTagProps {
   className?: string;
 }
 
-/** Nearest-deadline pill with an optional "+N more" indicator. */
+/** Nearest-deadline pill: red when it is close or past, amber while further out. */
 export function DeadlineTag({ date, extraCount = 0, className }: DeadlineTagProps) {
-  const urgency = urgencyOf(date);
-  const styles = URGENCY_STYLES[urgency];
+  const styles = URGENCY_STYLES[urgencyOf(date)];
 
   return (
     <View className={cn('flex-row items-center gap-1.5', className)}>
-      <View className={cn('flex-row items-center gap-1 rounded-full px-2 py-1', styles.bgClass)}>
+      <View className={cn('flex-row items-center gap-1 rounded-full px-2.5 py-1', styles.bgClass)}>
         <CalendarClock size={12} color={styles.color} />
         <Typography type="body-xs" weight="semibold" className={styles.textClass}>
           {`${relativeDeadlineLabel(date)} · ${formatShortDate(date)}`}
         </Typography>
       </View>
-      {extraCount > 0 ? (
-        <View className="bg-surface-tertiary rounded-full px-2 py-1">
-          <Typography type="body-xs" weight="medium" color="muted">
-            {`+${extraCount} more`}
-          </Typography>
-        </View>
-      ) : null}
+      <ExtraCount count={extraCount} />
     </View>
   );
 }
@@ -42,23 +57,22 @@ interface UnscheduledTagProps {
   className?: string;
 }
 
-/** Shown when a deadline was mentioned but no date could be pinned down. */
+/** Amber pill for a deadline that exists but has no date pinned down yet. */
 export function UnscheduledTag({ extraCount = 0, className }: UnscheduledTagProps) {
   return (
     <View className={cn('flex-row items-center gap-1.5', className)}>
-      <View className="bg-soon-soft flex-row items-center gap-1 rounded-full px-2 py-1">
-        <CalendarClock size={12} color={URGENCY_STYLES.soon.color} />
-        <Typography type="body-xs" weight="semibold" className="text-soon">
+      <View
+        className={cn(
+          'flex-row items-center gap-1 rounded-full px-2.5 py-1',
+          UNCONFIRMED_STYLE.bgClass,
+        )}
+      >
+        <CalendarClock size={12} color={UNCONFIRMED_STYLE.color} />
+        <Typography type="body-xs" weight="semibold" className={UNCONFIRMED_STYLE.textClass}>
           Date to confirm
         </Typography>
       </View>
-      {extraCount > 0 ? (
-        <View className="bg-surface-tertiary rounded-full px-2 py-1">
-          <Typography type="body-xs" weight="medium" color="muted">
-            {`+${extraCount} more`}
-          </Typography>
-        </View>
-      ) : null}
+      <ExtraCount count={extraCount} />
     </View>
   );
 }
@@ -68,17 +82,18 @@ interface NudgeTagProps {
   className?: string;
 }
 
-/** Shown for items where no deadline was detected. */
+/** Grey pill for items with no deadline at all. */
 export function NudgeTag({ date, className }: NudgeTagProps) {
   return (
     <View
       className={cn(
-        'bg-surface-tertiary flex-row items-center gap-1 rounded-full px-2 py-1',
+        'flex-row items-center rounded-full px-2.5 py-1',
+        NO_DEADLINE_STYLE.bgClass,
         className,
       )}
     >
-      <Typography type="body-xs" weight="medium" color="muted">
-        {`Gentle nudge · ${formatShortDate(date)}`}
+      <Typography type="body-xs" weight="medium" className={NO_DEADLINE_STYLE.textClass}>
+        {`No deadline · nudge ${formatShortDate(date)}`}
       </Typography>
     </View>
   );

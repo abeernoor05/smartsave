@@ -13,6 +13,7 @@ import { KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native';
 import { useState } from 'react';
 
 import { useAuth } from '@/lib/auth';
+import { COLORS } from '@/lib/colors';
 
 type Step = 'email' | 'code';
 
@@ -73,9 +74,9 @@ export function SignInScreen() {
         >
           <View className="items-center gap-3">
             <View className="bg-accent size-14 items-center justify-center rounded-2xl">
-              <Bookmark size={26} color="#FFFFFF" />
+              <Bookmark size={26} color={COLORS.onAccent} />
             </View>
-            <Typography.Heading type="h3" align="center">
+            <Typography.Heading type="h3" align="center" weight="bold">
               SmartSave
             </Typography.Heading>
             <Typography type="body-sm" color="muted" align="center">
@@ -83,11 +84,11 @@ export function SignInScreen() {
             </Typography>
           </View>
 
-          <Card className="gap-4 p-5">
+          <Card className="border-border gap-4 border p-5">
             {step === 'email' ? (
               <>
                 <View className="gap-1">
-                  <Typography type="body" weight="semibold">
+                  <Typography type="body" weight="bold">
                     Sign in
                   </Typography>
                   <Typography type="body-xs" color="muted">
@@ -125,7 +126,7 @@ export function SignInScreen() {
               <>
                 <View className="flex-row items-start gap-3">
                   <View className="bg-accent-soft size-10 items-center justify-center rounded-xl">
-                    <MailCheck size={18} color="#4F46E5" />
+                    <MailCheck size={18} color={COLORS.accent} />
                   </View>
                   <View className="flex-1 gap-1">
                     <Typography type="body" weight="semibold">

@@ -2,6 +2,8 @@ import { Button, Typography } from 'heroui-native';
 import type { LucideIcon } from 'lucide-react-native';
 import { View } from 'react-native';
 
+import { COLORS } from '@/lib/colors';
+
 interface EmptyStateProps {
   icon: LucideIcon;
   title: string;
@@ -18,11 +20,11 @@ export function EmptyState({
   onAction,
 }: EmptyStateProps) {
   return (
-    <View className="items-center gap-3 px-6 py-10">
-      <View className="bg-surface-tertiary size-12 items-center justify-center rounded-2xl">
-        <Icon size={22} color="#6A7080" />
+    <View className="items-center gap-3 px-6 py-12">
+      <View className="bg-surface-secondary size-12 items-center justify-center rounded-2xl">
+        <Icon size={22} color={COLORS.muted} />
       </View>
-      <Typography type="body" weight="semibold" align="center">
+      <Typography type="body" weight="bold" align="center">
         {title}
       </Typography>
       <Typography type="body-sm" color="muted" align="center">

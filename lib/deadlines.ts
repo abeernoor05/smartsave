@@ -6,6 +6,7 @@ import {
   parseISO,
 } from 'date-fns';
 
+import { COLORS } from '@/lib/colors';
 import type { Deadline, Item } from '@/lib/types';
 import { genId } from '@/lib/utils';
 
@@ -44,15 +45,36 @@ export function urgencyOf(iso: string, now: Date = new Date()): Urgency {
   return 'upcoming';
 }
 
-export const URGENCY_STYLES: Record<
-  Urgency,
-  { bgClass: string; textClass: string; color: string }
-> = {
-  overdue: { bgClass: 'bg-urgent-soft', textClass: 'text-urgent', color: '#C4382E' },
-  today: { bgClass: 'bg-urgent-soft', textClass: 'text-urgent', color: '#C4382E' },
-  soon: { bgClass: 'bg-soon-soft', textClass: 'text-soon', color: '#BC7011' },
-  upcoming: { bgClass: 'bg-calm-soft', textClass: 'text-calm', color: '#6A7080' },
+export interface BadgeStyle {
+  bgClass: string;
+  textClass: string;
+  color: string;
+}
+
+const RED: BadgeStyle = {
+  bgClass: 'bg-urgent-soft',
+  textClass: 'text-urgent',
+  color: COLORS.urgent,
 };
+const AMBER: BadgeStyle = { bgClass: 'bg-soon-soft', textClass: 'text-soon', color: COLORS.soon };
+const GREY: BadgeStyle = { bgClass: 'bg-calm-soft', textClass: 'text-calm', color: COLORS.calm };
+
+/**
+ * Deadline badges: red once a date is overdue, today, or within three days;
+ * amber while it is still further out.
+ */
+export const URGENCY_STYLES: Record<Urgency, BadgeStyle> = {
+  overdue: RED,
+  today: RED,
+  soon: RED,
+  upcoming: AMBER,
+};
+
+/** A deadline that was mentioned but has no date pinned down yet. */
+export const UNCONFIRMED_STYLE = AMBER;
+
+/** An item with no deadline at all — only a gentle resurface nudge. */
+export const NO_DEADLINE_STYLE = GREY;
 
 /** "in 4 days", "today", "2 days ago" */
 export function relativeDeadlineLabel(iso: string, now: Date = new Date()): string {

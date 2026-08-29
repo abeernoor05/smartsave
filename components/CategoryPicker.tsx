@@ -2,6 +2,7 @@ import { Typography } from 'heroui-native';
 import { Pressable, View } from 'react-native';
 
 import { CATEGORY_META } from '@/lib/categories';
+import { COLORS } from '@/lib/colors';
 import { CATEGORIES, type Category } from '@/lib/types';
 import { cn } from '@/lib/utils';
 
@@ -15,8 +16,7 @@ export function CategoryPicker({ value, onChange }: CategoryPickerProps) {
   return (
     <View className="flex-row flex-wrap gap-2">
       {CATEGORIES.map((category) => {
-        const meta = CATEGORY_META[category];
-        const Icon = meta.icon;
+        const Icon = CATEGORY_META[category].icon;
         const isSelected = category === value;
 
         return (
@@ -25,21 +25,19 @@ export function CategoryPicker({ value, onChange }: CategoryPickerProps) {
             accessibilityRole="button"
             accessibilityState={{ selected: isSelected }}
             onPress={() => onChange(category)}
-            style={({ pressed }) => ({ opacity: pressed ? 0.85 : 1 })}
+            style={({ pressed }) => ({ opacity: pressed ? 0.9 : 1 })}
           >
             <View
               className={cn(
                 'flex-row items-center gap-1.5 rounded-full border px-3 py-2',
-                isSelected
-                  ? `${meta.chipBgClass} border-accent`
-                  : 'bg-surface-secondary border-transparent',
+                isSelected ? 'bg-accent border-accent' : 'bg-surface-secondary border-border',
               )}
             >
-              <Icon size={14} color={isSelected ? meta.color : '#6A7080'} />
+              <Icon size={14} color={isSelected ? COLORS.onAccent : COLORS.muted} />
               <Typography
                 type="body-xs"
                 weight={isSelected ? 'semibold' : 'medium'}
-                className={isSelected ? meta.chipTextClass : undefined}
+                className={isSelected ? 'text-accent-foreground' : undefined}
                 color={isSelected ? 'default' : 'muted'}
               >
                 {category}

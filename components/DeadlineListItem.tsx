@@ -4,12 +4,14 @@ import { CalendarPlus, Check, Pencil, Trash2 } from 'lucide-react-native';
 import { View } from 'react-native';
 import { useState } from 'react';
 
+import { COLORS } from '@/lib/colors';
 import {
   type DeadlinePatch,
   formatDate,
   leadDaysOf,
   relativeDeadlineLabel,
   reminderDateFor,
+  UNCONFIRMED_STYLE,
   URGENCY_STYLES,
   urgencyOf,
 } from '@/lib/deadlines';
@@ -41,7 +43,7 @@ export function DeadlineListItem({
   const [isEditing, setIsEditing] = useState(startExpanded);
 
   const leadDays = leadDaysOf(deadline);
-  const styles = deadline.date ? URGENCY_STYLES[urgencyOf(deadline.date)] : URGENCY_STYLES.upcoming;
+  const styles = deadline.date ? URGENCY_STYLES[urgencyOf(deadline.date)] : UNCONFIRMED_STYLE;
 
   const shiftDate = (days: number) => {
     if (!deadline.date) return;
@@ -61,10 +63,10 @@ export function DeadlineListItem({
   };
 
   return (
-    <Card className="gap-3 p-4">
+    <Card className="border-border gap-3 border p-4">
       <View className="flex-row items-start justify-between gap-3">
         <View className="flex-1 gap-1">
-          <Typography type="body-sm" weight="semibold">
+          <Typography type="body-sm" weight="bold">
             {deadline.context || 'Deadline'}
           </Typography>
 
@@ -94,7 +96,11 @@ export function DeadlineListItem({
             accessibilityLabel={isEditing ? 'Finish editing deadline' : 'Edit deadline'}
             onPress={() => setIsEditing((editing) => !editing)}
           >
-            {isEditing ? <Check size={16} color="#4F46E5" /> : <Pencil size={16} color="#6A7080" />}
+            {isEditing ? (
+              <Check size={16} color={COLORS.accent} />
+            ) : (
+              <Pencil size={16} color={COLORS.muted} />
+            )}
           </Button>
           <Button
             isIconOnly
@@ -103,7 +109,7 @@ export function DeadlineListItem({
             accessibilityLabel="Remove deadline"
             onPress={onRemove}
           >
-            <Trash2 size={16} color="#C4382E" />
+            <Trash2 size={16} color={COLORS.urgent} />
           </Button>
         </View>
       </View>
@@ -133,7 +139,7 @@ export function DeadlineListItem({
             </View>
           ) : null}
           <Button size="sm" variant="secondary" onPress={giveItADate}>
-            <CalendarPlus size={14} color="#4F46E5" />
+            <CalendarPlus size={14} color={COLORS.accent} />
             <Button.Label>Set a date</Button.Label>
           </Button>
         </View>

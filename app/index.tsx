@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { CalendarCheck, LogOut, Plus } from 'lucide-react-native';
+import { ArrowRight, CalendarCheck, LogOut, Plus } from 'lucide-react-native';
 import { Button, Card, SearchField, Spinner, Typography } from 'heroui-native';
 import { Pressable, RefreshControl, ScrollView, View } from 'react-native';
 import { useMemo, useState } from 'react';
@@ -7,6 +7,7 @@ import { useMemo, useState } from 'react';
 import { FolderCard } from '@/components/FolderCard';
 import { UpcomingDeadlineCard } from '@/components/UpcomingDeadlineCard';
 import { useAuth } from '@/lib/auth';
+import { COLORS } from '@/lib/colors';
 import { daysUntil, upcomingDeadlines } from '@/lib/deadlines';
 import { countsByCategory, useSmartSaveStore } from '@/lib/store';
 import { CATEGORIES, type Category } from '@/lib/types';
@@ -38,11 +39,11 @@ export default function HomeScreen() {
   );
 
   const isFirstLoad = status === 'loading' && items.length === 0;
+  const trimmedQuery = query.trim();
 
   const runSearch = () => {
-    const trimmed = query.trim();
-    if (!trimmed) return;
-    router.push({ pathname: '/search', params: { q: trimmed } });
+    if (!trimmedQuery) return;
+    router.push({ pathname: '/search', params: { q: trimmedQuery } });
   };
 
   return (
@@ -54,10 +55,12 @@ export default function HomeScreen() {
           <RefreshControl refreshing={status === 'loading'} onRefresh={() => void loadItems()} />
         }
       >
-        <View className="pt-safe-offset-4 gap-5 px-4">
+        <View className="pt-safe-offset-4 gap-6 px-4">
           <View className="flex-row items-center justify-between gap-3">
             <View className="flex-1">
-              <Typography.Heading type="h3">SmartSave</Typography.Heading>
+              <Typography.Heading type="h3" weight="bold">
+                SmartSave
+              </Typography.Heading>
               <Typography type="body-sm" color="muted">
                 {`${items.length} saved · ${dueThisWeek} due this week`}
               </Typography>
@@ -69,16 +72,16 @@ export default function HomeScreen() {
               accessibilityLabel="Sign out"
               onPress={() => void signOut()}
             >
-              <LogOut size={18} color="#6A7080" />
+              <LogOut size={18} color={COLORS.muted} />
             </Button>
             <Pressable
               accessibilityLabel="Save a link"
               accessibilityRole="button"
-              className="bg-accent size-12 items-center justify-center rounded-2xl"
+              className="bg-accent size-11 items-center justify-center rounded-2xl"
               onPress={() => router.push('/add-link')}
-              style={({ pressed }) => ({ opacity: pressed ? 0.85 : 1 })}
+              style={({ pressed }) => ({ opacity: pressed ? 0.9 : 1 })}
             >
-              <Plus size={22} color="#FFFFFF" />
+              <Plus size={22} color={COLORS.onAccent} />
             </Pressable>
           </View>
 
@@ -87,25 +90,31 @@ export default function HomeScreen() {
               <SearchField.Group>
                 <SearchField.SearchIcon />
                 <SearchField.Input
-                  placeholder="Search summaries, captions, deadlines"
+                  placeholder="Search summaries, captions, folders"
                   returnKeyType="search"
                   onSubmitEditing={runSearch}
                 />
                 <SearchField.ClearButton />
               </SearchField.Group>
             </SearchField>
-            {query.trim().length > 0 ? (
-              <Pressable accessibilityRole="button" onPress={runSearch}>
-                <Typography type="body-sm" weight="medium" className="text-accent px-1">
-                  {`See all results for "${query.trim()}"`}
+            {trimmedQuery.length > 0 ? (
+              <Pressable
+                accessibilityRole="button"
+                className="flex-row items-center gap-1.5 px-1 py-1"
+                onPress={runSearch}
+                style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+              >
+                <Typography type="body-sm" weight="semibold" className="text-accent">
+                  {`Search for "${trimmedQuery}"`}
                 </Typography>
+                <ArrowRight size={14} color={COLORS.accent} />
               </Pressable>
             ) : null}
           </View>
 
           {storeError ? (
-            <Card className="gap-2 p-4">
-              <Typography type="body-sm" weight="medium" className="text-urgent">
+            <Card className="border-border gap-2 border p-4">
+              <Typography type="body-sm" weight="semibold" className="text-urgent">
                 {storeError}
               </Typography>
               <Button size="sm" variant="secondary" onPress={() => void loadItems()}>
@@ -125,7 +134,7 @@ export default function HomeScreen() {
             <>
               <View className="gap-3">
                 <View className="flex-row items-center justify-between">
-                  <Typography type="body" weight="semibold">
+                  <Typography type="body" weight="bold">
                     Upcoming deadlines
                   </Typography>
                   {upcoming.length > 0 ? (
@@ -147,12 +156,12 @@ export default function HomeScreen() {
                     ))}
                   </ScrollView>
                 ) : (
-                  <Card className="flex-row items-center gap-3 p-4">
+                  <Card className="border-border flex-row items-center gap-3 border p-4">
                     <View className="bg-surface-secondary size-10 items-center justify-center rounded-xl">
-                      <CalendarCheck size={18} color="#6A7080" />
+                      <CalendarCheck size={18} color={COLORS.muted} />
                     </View>
-                    <View className="flex-1">
-                      <Typography type="body-sm" weight="medium">
+                    <View className="flex-1 gap-0.5">
+                      <Typography type="body-sm" weight="bold">
                         {items.length === 0 ? 'Nothing saved yet' : 'Nothing time-sensitive'}
                       </Typography>
                       <Typography type="body-xs" color="muted">
@@ -166,7 +175,7 @@ export default function HomeScreen() {
               </View>
 
               <View className="gap-3">
-                <Typography type="body" weight="semibold">
+                <Typography type="body" weight="bold">
                   Folders
                 </Typography>
                 <View className="flex-row flex-wrap justify-between gap-y-3">

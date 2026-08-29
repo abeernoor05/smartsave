@@ -1,6 +1,7 @@
 import { Image, View } from 'react-native';
 
 import { CATEGORY_META } from '@/lib/categories';
+import { COLORS } from '@/lib/colors';
 import { thumbnailSource } from '@/lib/thumbnails';
 import type { Category } from '@/lib/types';
 import { cn } from '@/lib/utils';
@@ -13,19 +14,18 @@ interface ThumbnailProps {
   className?: string;
 }
 
-/** Preview image for a saved item, falling back to a category-tinted tile. */
+/** Preview image for a saved item, falling back to the folder's icon. */
 export function Thumbnail({ url, category, width, height, className }: ThumbnailProps) {
-  const meta = CATEGORY_META[category];
   const source = thumbnailSource(url);
-  const Icon = meta.icon;
+  const Icon = CATEGORY_META[category].icon;
 
   if (!source) {
     return (
       <View
-        className={cn('items-center justify-center rounded-2xl', meta.iconBgClass, className)}
+        className={cn('bg-accent-soft items-center justify-center rounded-2xl', className)}
         style={{ width, height }}
       >
-        <Icon size={Math.max(18, Math.min(32, Math.round(width / 3)))} color={meta.color} />
+        <Icon size={Math.max(18, Math.min(32, Math.round(width / 3)))} color={COLORS.accent} />
       </View>
     );
   }

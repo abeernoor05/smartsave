@@ -26,6 +26,7 @@ import { CategoryPicker } from '@/components/CategoryPicker';
 import { DeadlineListItem } from '@/components/DeadlineListItem';
 import { Thumbnail } from '@/components/Thumbnail';
 import { PLATFORM_META } from '@/lib/categories';
+import { COLORS } from '@/lib/colors';
 import {
   applyDeadlinePatch,
   createDeadline,
@@ -220,10 +221,10 @@ export default function AddLinkScreen() {
           style={{ maxHeight: height * 0.86 }}
           contentContainerStyle={{ padding: 16, paddingBottom: 32 }}
         >
-          <Card className="gap-4 p-5">
+          <Card className="border-border gap-4 border p-5">
             <View className="flex-row items-start justify-between gap-3">
               <View className="flex-1">
-                <Typography.Heading type="h4">
+                <Typography.Heading type="h4" weight="bold">
                   {phase === 'review'
                     ? 'Check before saving'
                     : phase === 'note'
@@ -246,7 +247,7 @@ export default function AddLinkScreen() {
                 isDisabled={isBusy}
                 onPress={close}
               >
-                <X size={18} color="#6A7080" />
+                <X size={18} color={COLORS.muted} />
               </Button>
             </View>
 
@@ -399,7 +400,7 @@ export default function AddLinkScreen() {
                       ) : null}
                     </View>
                     <Button size="sm" variant="secondary" onPress={addDraftDeadline}>
-                      <Plus size={14} color="#4F46E5" />
+                      <Plus size={14} color={COLORS.accent} />
                       <Button.Label>Add</Button.Label>
                     </Button>
                   </View>
@@ -431,7 +432,7 @@ export default function AddLinkScreen() {
                     {phase === 'saving' ? (
                       <Spinner size="sm" />
                     ) : (
-                      <CheckCheck size={16} color="#FFFFFF" />
+                      <CheckCheck size={16} color={COLORS.onAccent} />
                     )}
                     <Button.Label>
                       {phase === 'saving' ? 'Saving…' : 'Confirm and save'}
