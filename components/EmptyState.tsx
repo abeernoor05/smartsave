@@ -31,8 +31,8 @@ export function EmptyState({
         {description}
       </Typography>
       {actionLabel && onAction ? (
-        <Button size="sm" onPress={onAction}>
-          <Button.Label>{actionLabel}</Button.Label>
+        <Button className="bg-focal" size="sm" onPress={onAction}>
+          <Button.Label className="text-focal-foreground">{actionLabel}</Button.Label>
         </Button>
       ) : null}
     </View>

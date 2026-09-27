@@ -287,8 +287,14 @@ export default function AddLinkScreen() {
                   </View>
                 ) : null}
 
-                <Button isDisabled={isBusy} onPress={() => void handleAnalyze()}>
-                  <Button.Label>{isBusy ? 'Analyzing…' : 'Save and analyze'}</Button.Label>
+                <Button
+                  className="bg-focal"
+                  isDisabled={isBusy}
+                  onPress={() => void handleAnalyze()}
+                >
+                  <Button.Label className="text-focal-foreground">
+                    {isBusy ? 'Analyzing…' : 'Save and analyze'}
+                  </Button.Label>
                 </Button>
               </>
             ) : null}
@@ -337,9 +343,11 @@ export default function AddLinkScreen() {
                   Saved without a deadline, so it gets a gentle nudge instead.
                 </Typography>
 
-                <Button isDisabled={phase === 'saving'} onPress={confirmNote}>
-                  {phase === 'saving' ? <Spinner size="sm" /> : null}
-                  <Button.Label>{phase === 'saving' ? 'Saving…' : 'Save note'}</Button.Label>
+                <Button className="bg-focal" isDisabled={phase === 'saving'} onPress={confirmNote}>
+                  {phase === 'saving' ? <Spinner size="sm" color={COLORS.focalInk} /> : null}
+                  <Button.Label className="text-focal-foreground">
+                    {phase === 'saving' ? 'Saving…' : 'Save note'}
+                  </Button.Label>
                 </Button>
               </>
             ) : null}
@@ -433,13 +441,17 @@ export default function AddLinkScreen() {
                 ) : null}
 
                 <View className="gap-2">
-                  <Button isDisabled={phase === 'saving'} onPress={confirmAnalyzed}>
+                  <Button
+                    className="bg-focal"
+                    isDisabled={phase === 'saving'}
+                    onPress={confirmAnalyzed}
+                  >
                     {phase === 'saving' ? (
-                      <Spinner size="sm" />
+                      <Spinner size="sm" color={COLORS.focalInk} />
                     ) : (
-                      <CheckCheck size={16} color={COLORS.onAccent} />
+                      <CheckCheck size={16} color={COLORS.focalInk} />
                     )}
-                    <Button.Label>
+                    <Button.Label className="text-focal-foreground">
                       {phase === 'saving' ? 'Saving…' : 'Confirm and save'}
                     </Button.Label>
                   </Button>

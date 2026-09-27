@@ -190,12 +190,12 @@ export function SignInScreen({ intent = 'signin', onBack }: SignInScreenProps) {
                     </TextField>
 
                     <Button
-                      className="h-14 rounded-2xl bg-white"
+                      className="bg-focal h-14 rounded-2xl"
                       isDisabled={isBusy}
                       onPress={() => void sendCode()}
                     >
                       {isBusy ? <Spinner size="sm" /> : null}
-                      <Button.Label className="text-[#24134F]">
+                      <Button.Label className="text-focal-foreground">
                         {isBusy ? 'Sending…' : isSignUp ? 'Create account' : 'Log in'}
                       </Button.Label>
                     </Button>
@@ -237,12 +237,12 @@ export function SignInScreen({ intent = 'signin', onBack }: SignInScreenProps) {
                     </TextField>
 
                     <Button
-                      className="h-14 rounded-2xl bg-white"
+                      className="bg-focal h-14 rounded-2xl"
                       isDisabled={isBusy}
                       onPress={() => void verify()}
                     >
                       {isBusy ? <Spinner size="sm" /> : null}
-                      <Button.Label className="text-[#24134F]">
+                      <Button.Label className="text-focal-foreground">
                         {isBusy ? 'Checking…' : isSignUp ? 'Finish sign up' : 'Log in'}
                       </Button.Label>
                     </Button>

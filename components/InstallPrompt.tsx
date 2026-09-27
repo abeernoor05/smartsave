@@ -135,10 +135,10 @@ export function InstallPrompt() {
         </Pressable>
         <Pressable
           accessibilityRole="button"
-          className="bg-primary rounded-md px-3 py-2"
+          className="bg-focal rounded-md px-3 py-2"
           onPress={handleInstall}
         >
-          <Text.Paragraph type="body-sm" weight="semibold" className="text-primary-foreground">
+          <Text.Paragraph type="body-sm" weight="semibold" className="text-focal-foreground">
             Install
           </Text.Paragraph>
         </Pressable>

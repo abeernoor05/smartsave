@@ -99,6 +99,8 @@
 }
 
 @theme {
+  --color-focal: oklch(1 0 0);
+  --color-focal-foreground: oklch(0.24 0.09 290);
   --color-urgent: oklch(0.76 0.15 25);
   --color-urgent-soft: oklch(0.31 0.09 25);
   --color-soon: oklch(0.82 0.13 78);

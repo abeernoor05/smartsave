@@ -297,9 +297,9 @@ export default function ItemDetailScreen() {
           </Card>
 
           <View className="gap-3">
-            <Button onPress={() => void Linking.openURL(item.original_url)}>
-              <ExternalLink size={16} color={COLORS.onAccent} />
-              <Button.Label>Open original link</Button.Label>
+            <Button className="bg-focal" onPress={() => void Linking.openURL(item.original_url)}>
+              <ExternalLink size={16} color={COLORS.focalInk} />
+              <Button.Label className="text-focal-foreground">Open original link</Button.Label>
             </Button>
             <Typography type="body-xs" color="muted" align="center" numberOfLines={1}>
               {item.original_url}

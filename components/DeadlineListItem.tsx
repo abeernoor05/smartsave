@@ -184,21 +184,27 @@ export function DeadlineListItem({
                   {LEAD_OPTIONS.map((lead) => (
                     <Button
                       key={lead}
+                      className={leadDays === lead ? 'bg-focal' : undefined}
                       size="sm"
                       variant={leadDays === lead ? 'primary' : 'secondary'}
                       onPress={() => setLead(lead)}
                     >
-                      <Button.Label>
+                      <Button.Label
+                        className={leadDays === lead ? 'text-focal-foreground' : undefined}
+                      >
                         {lead === 1 ? '1 day before' : `${lead} days before`}
                       </Button.Label>
                     </Button>
                   ))}
                   <Button
+                    className={leadDays === 0 ? 'bg-focal' : undefined}
                     size="sm"
                     variant={leadDays === 0 ? 'primary' : 'secondary'}
                     onPress={() => setLead(0)}
                   >
-                    <Button.Label>On the day</Button.Label>
+                    <Button.Label className={leadDays === 0 ? 'text-focal-foreground' : undefined}>
+                      On the day
+                    </Button.Label>
                   </Button>
                 </View>
               </View>

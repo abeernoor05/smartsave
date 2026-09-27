@@ -7,6 +7,8 @@ export const COLORS = {
   accent: '#7567F4',
   /** --accent-foreground */
   onAccent: '#FFFFFF',
+  /** Dark violet content on white focal controls */
+  focalInk: '#24134F',
   /** --foreground */
   ink: '#F8F7FF',
   /** --muted */

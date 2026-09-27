@@ -30,15 +30,15 @@ export function CategoryPicker({ value, onChange }: CategoryPickerProps) {
             <View
               className={cn(
                 'flex-row items-center gap-1.5 rounded-lg border px-3 py-2',
-                isSelected ? 'bg-accent border-accent' : 'bg-surface-secondary/80 border-border',
+                isSelected ? 'bg-focal border-focal' : 'bg-surface-secondary/80 border-border',
               )}
             >
-              <Icon size={14} color={isSelected ? COLORS.onAccent : COLORS.muted} />
+              <Icon size={14} color={isSelected ? COLORS.focalInk : COLORS.muted} />
               <Typography
                 type="body-xs"
                 weight={isSelected ? 'semibold' : 'medium'}
-                className={isSelected ? 'text-accent-foreground' : undefined}
-                color={isSelected ? 'default' : 'muted'}
+                className={isSelected ? 'text-focal-foreground' : undefined}
+                color={isSelected ? undefined : 'muted'}
               >
                 {category}
               </Typography>
