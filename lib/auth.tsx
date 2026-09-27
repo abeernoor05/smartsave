@@ -7,8 +7,8 @@ interface AuthValue {
   session: Session | null;
   userId: string | null;
   isLoading: boolean;
-  /** Sends a 6-digit sign-in code, creating the account on first use. */
-  requestCode: (email: string) => Promise<void>;
+  /** Sends a 6-digit code. Sign-up may create an account; login never does. */
+  requestCode: (email: string, shouldCreateUser: boolean) => Promise<void>;
   confirmCode: (email: string, code: string) => Promise<void>;
   signOut: () => Promise<void>;
 }
@@ -45,10 +45,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       session,
       userId: session?.user.id ?? null,
       isLoading,
-      requestCode: async (email: string) => {
+      requestCode: async (email: string, shouldCreateUser: boolean) => {
         const { error } = await bilt.auth.signInWithOtp({
           email: email.trim().toLowerCase(),
-          options: { shouldCreateUser: true },
+          options: { shouldCreateUser },
         });
         if (error) throw new Error(backendErrorMessage(error, 'Could not send the code.'));
       },

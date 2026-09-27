@@ -116,6 +116,7 @@ function AuthGate() {
     );
   } else if (!session) {
     if (authIntent) {
+      statusBarStyle = 'light';
       content = <SignInScreen intent={authIntent} onBack={() => setAuthIntent(null)} />;
     } else {
       statusBarStyle = 'light';
