@@ -5,38 +5,45 @@ import { LinearGradient } from '@/components/ui/primitives/LinearGradient';
 import { SafeAreaView } from '@/components/ui/primitives/SafeAreaView';
 import { WELCOME_COLORS } from '@/lib/colors';
 
-const WELCOME_HERO = require('@/assets/smartsave-welcome-hero.png');
+const WELCOME_REFERENCE = require('@/assets/smartsave-welcome-reference.png');
+const REFERENCE_ASPECT_RATIO = 914 / 412;
+const WELCOME_CANVAS = '#080810';
+const TRANSPARENT_CANVAS = 'rgba(8, 8, 16, 0)';
 
 type WelcomeScreenProps = {
   onGetStarted: () => void;
   onSignIn: () => void;
 };
 
-/** Native welcome layout with artwork fading directly into the screen canvas. */
+/** Recreates the Figma welcome composition with native title and actions. */
 export function WelcomeScreen({ onGetStarted, onSignIn }: WelcomeScreenProps) {
   const { width, height } = useWindowDimensions();
-  const heroHeight = Math.min(Math.max(height * 0.58, 390), 610);
-  const heroWidth = Math.min(Math.max(width, heroHeight * (2 / 3)), 560);
+  const isCompact = height < 740;
+  const sceneWidth = Math.min(width, isCompact ? height * 0.48 : 500);
+  const sceneHeight = sceneWidth * REFERENCE_ASPECT_RATIO;
+  const heroHeight = isCompact
+    ? Math.min(Math.max(height * 0.67, 430), 480)
+    : Math.min(Math.max(height * 0.69, 540), 640);
 
   return (
     <SafeAreaView style={styles.screen}>
       <View style={[styles.heroRegion, { height: heroHeight }]}>
         <Image
           accessibilityIgnoresInvertColors
-          resizeMode="cover"
-          source={WELCOME_HERO}
-          style={[styles.hero, { width: heroWidth, height: heroHeight }]}
+          resizeMode="contain"
+          source={WELCOME_REFERENCE}
+          style={[styles.hero, { width: sceneWidth, height: sceneHeight }]}
         />
         <LinearGradient
-          colors={[WELCOME_COLORS.transparentNavy, WELCOME_COLORS.navyFade, WELCOME_COLORS.navy]}
-          locations={[0, 0.62, 1]}
+          colors={[TRANSPARENT_CANVAS, 'rgba(8, 8, 16, 0.42)', WELCOME_CANVAS]}
+          locations={[0.72, 0.88, 1]}
           pointerEvents="none"
           style={styles.heroFade}
         />
       </View>
 
-      <View style={styles.content}>
-        <Text accessibilityRole="header" style={styles.title}>
+      <View style={[styles.content, isCompact && styles.compactContent]}>
+        <Text accessibilityRole="header" style={[styles.title, isCompact && styles.compactTitle]}>
           Smart Save
         </Text>
 
@@ -48,7 +55,7 @@ export function WelcomeScreen({ onGetStarted, onSignIn }: WelcomeScreenProps) {
             onPress={onGetStarted}
             style={({ pressed }) => [styles.primaryButton, pressed && styles.primaryPressed]}
           >
-            <Zap color="#24134F" fill="#24134F" size={20} strokeWidth={2.2} />
+            <Zap color={WELCOME_COLORS.violet} size={19} strokeWidth={2.5} />
             <Text style={styles.primaryLabel}>Get Started - It&apos;s Free</Text>
           </Pressable>
 
@@ -71,7 +78,7 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     alignItems: 'center',
-    backgroundColor: WELCOME_COLORS.navy,
+    backgroundColor: WELCOME_CANVAS,
     overflow: 'hidden',
   },
   heroRegion: {
@@ -92,9 +99,13 @@ const styles = StyleSheet.create({
     maxWidth: 520,
     alignItems: 'center',
     justifyContent: 'space-between',
+    marginTop: -10,
     paddingHorizontal: 24,
     paddingBottom: 26,
-    marginTop: -28,
+  },
+  compactContent: {
+    marginTop: -6,
+    paddingBottom: 18,
   },
   title: {
     color: WELCOME_COLORS.white,
@@ -103,6 +114,10 @@ const styles = StyleSheet.create({
     lineHeight: 48,
     letterSpacing: -1.5,
     textAlign: 'center',
+  },
+  compactTitle: {
+    fontSize: 36,
+    lineHeight: 43,
   },
   actions: {
     width: '100%',
