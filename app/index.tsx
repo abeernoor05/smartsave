@@ -151,16 +151,23 @@ export default function HomeScreen() {
                 <Typography type="body" weight="bold">
                   Folders
                 </Typography>
-                <View className="gap-4">
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  decelerationRate="fast"
+                  snapToInterval={300}
+                  contentContainerStyle={{ gap: 12, paddingRight: 20 }}
+                >
                   {CATEGORIES.map((category: Category) => (
-                    <FolderCard
-                      key={category}
-                      category={category}
-                      count={counts[category] ?? 0}
-                      dueSoonCount={dueSoonByCategory[category] ?? 0}
-                    />
+                    <View key={category} style={{ width: 288 }}>
+                      <FolderCard
+                        category={category}
+                        count={counts[category] ?? 0}
+                        dueSoonCount={dueSoonByCategory[category] ?? 0}
+                      />
+                    </View>
                   ))}
-                </View>
+                </ScrollView>
               </View>
             </>
           )}
