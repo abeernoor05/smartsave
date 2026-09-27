@@ -1,10 +1,12 @@
 import { router } from 'expo-router';
 import { ChevronRight } from 'lucide-react-native';
-import { Card, Typography } from 'heroui-native';
-import { Pressable, View } from 'react-native';
+import { Typography } from 'heroui-native';
+import { ImageBackground, Pressable, View } from 'react-native';
 
+import { LinearGradient } from '@/components/ui/primitives/LinearGradient';
 import { CATEGORY_META } from '@/lib/categories';
 import { COLORS } from '@/lib/colors';
+import { LOCAL_THUMBNAIL_BY_CATEGORY, thumbnailSource } from '@/lib/thumbnails';
 import type { Category } from '@/lib/types';
 
 interface FolderCardProps {
@@ -13,43 +15,56 @@ interface FolderCardProps {
   dueSoonCount: number;
 }
 
-/** Dashboard folder tile with item count. */
+/** Large image-backed dashboard folder card with item and deadline counts. */
 export function FolderCard({ category, count, dueSoonCount }: FolderCardProps) {
   const meta = CATEGORY_META[category];
   const Icon = meta.icon;
+  const imageSource = thumbnailSource(LOCAL_THUMBNAIL_BY_CATEGORY[category]);
 
   return (
     <Pressable
+      accessibilityLabel={`Open ${category} folder, ${count === 1 ? '1 item' : `${count} items`}`}
       accessibilityRole="button"
-      className="w-[48%]"
+      className="w-full"
       onPress={() => router.push({ pathname: '/folder/[category]', params: { category } })}
-      style={({ pressed }) => ({ opacity: pressed ? 0.9 : 1 })}
+      style={({ pressed }) => ({ opacity: pressed ? 0.88 : 1 })}
     >
-      <Card className="border-border bg-surface/95 min-h-44 gap-4 rounded-3xl border p-4">
-        <View className="flex-row items-start justify-between">
-          <View className="bg-accent-soft size-10 items-center justify-center rounded-xl">
-            <Icon size={19} color={COLORS.accent} />
+      <View className="border-border bg-surface h-52 overflow-hidden rounded-[28px] border">
+        <ImageBackground
+          source={imageSource ?? undefined}
+          resizeMode="cover"
+          style={{ width: '100%', height: 208 }}
+        >
+          <LinearGradient
+            colors={[COLORS.imageOverlayTop, COLORS.imageOverlayMid, COLORS.imageOverlayBottom]}
+            locations={[0, 0.44, 1]}
+            className="absolute inset-0"
+          />
+
+          <View className="flex-1 justify-between p-5">
+            <View className="flex-row items-start justify-between">
+              <View className="size-11 items-center justify-center rounded-2xl border border-white/20 bg-black/35">
+                <Icon size={20} color={COLORS.onAccent} />
+              </View>
+              <View className="flex-row items-center gap-1.5 rounded-full border border-white/20 bg-black/45 px-3 py-2">
+                <Typography type="body-xs" weight="semibold" style={{ color: COLORS.onAccent }}>
+                  {count === 1 ? '1 item' : `${count} items`}
+                </Typography>
+                <ChevronRight size={14} color={COLORS.onAccent} />
+              </View>
+            </View>
+
+            <View className="gap-1">
+              <Typography.Heading type="h3" weight="bold" style={{ color: COLORS.onAccent }}>
+                {category}
+              </Typography.Heading>
+              <Typography type="body-sm" style={{ color: COLORS.onImageMuted }}>
+                {dueSoonCount > 0 ? `${dueSoonCount} due soon` : meta.tagline}
+              </Typography>
+            </View>
           </View>
-          <ChevronRight size={16} color={COLORS.subtle} />
-        </View>
-        <View className="gap-0.5">
-          <Typography type="body" weight="bold">
-            {category}
-          </Typography>
-          <Typography type="body-xs" color="muted">
-            {count === 1 ? '1 item' : `${count} items`}
-          </Typography>
-          {dueSoonCount > 0 ? (
-            <Typography type="body-xs" weight="semibold" className="text-urgent">
-              {`${dueSoonCount} due soon`}
-            </Typography>
-          ) : (
-            <Typography type="body-xs" color="muted" numberOfLines={1}>
-              {meta.tagline}
-            </Typography>
-          )}
-        </View>
-      </Card>
+        </ImageBackground>
+      </View>
     </Pressable>
   );
 }

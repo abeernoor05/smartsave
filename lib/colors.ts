@@ -17,6 +17,12 @@ export const COLORS = {
   canvas: '#080810',
   /** Translucent card border */
   glassBorder: 'rgba(255,255,255,0.14)',
+  /** Image-card overlay from transparent to navy */
+  imageOverlayTop: 'rgba(8,8,16,0.04)',
+  imageOverlayMid: 'rgba(8,8,16,0.32)',
+  imageOverlayBottom: 'rgba(8,8,16,0.96)',
+  /** Secondary text shown over imagery */
+  onImageMuted: 'rgba(255,255,255,0.82)',
   /** --color-urgent */
   urgent: '#FF8A85',
   /** --color-soon */

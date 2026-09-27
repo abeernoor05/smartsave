@@ -215,7 +215,7 @@ export default function HomeScreen() {
                 <Typography type="body" weight="bold">
                   Folders
                 </Typography>
-                <View className="flex-row flex-wrap justify-between gap-y-3">
+                <View className="gap-4">
                   {CATEGORIES.map((category: Category) => (
                     <FolderCard
                       key={category}
