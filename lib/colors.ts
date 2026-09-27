@@ -1,27 +1,28 @@
 /**
- * Hex mirrors of the theme tokens in global.css.
- *
- * Uniwind classes cannot reach icon `color` props or other native colour
- * props, and React Native cannot parse `oklch(...)`, so those places read
- * from here instead of hard-coding a value.
+ * React Native-readable mirrors of the semantic colours in global.css.
+ * Native icon props cannot consume oklch() values from Uniwind.
  */
 export const COLORS = {
-  /** --accent, deep blue */
-  accent: '#1E40AF',
-  /** --accent-foreground, text and icons on top of the accent */
+  /** --accent, SmartSave violet */
+  accent: '#7567F4',
+  /** --accent-foreground */
   onAccent: '#FFFFFF',
-  /** --foreground, titles */
-  ink: '#1B1F2A',
-  /** --muted, metadata */
-  muted: '#6B7280',
-  /** Lighter than muted, for chevrons and other decorative marks */
-  subtle: '#9AA3B2',
-  /** --color-urgent, red badge */
-  urgent: '#B42318',
-  /** --color-soon, amber badge */
-  soon: '#92400E',
-  /** --color-calm, grey badge */
-  calm: '#525A69',
+  /** --foreground */
+  ink: '#F8F7FF',
+  /** --muted */
+  muted: '#B8B5C8',
+  /** Decorative marks and quiet controls */
+  subtle: '#817E91',
+  /** Navy app canvas */
+  canvas: '#080810',
+  /** Translucent card border */
+  glassBorder: 'rgba(255,255,255,0.14)',
+  /** --color-urgent */
+  urgent: '#FF8A85',
+  /** --color-soon */
+  soon: '#F4C96B',
+  /** --color-calm */
+  calm: '#BDB8CD',
 } as const;
 
 /** Native-only palette for the cinematic signed-out welcome flow. */

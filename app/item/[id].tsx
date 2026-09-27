@@ -75,7 +75,7 @@ export default function ItemDetailScreen() {
     );
   }
 
-  const heroWidth = Math.max(240, width - 32);
+  const heroWidth = Math.max(240, width - 40);
   const platform = PLATFORM_META[item.platform];
   const PlatformIcon = platform.icon;
   const confidence = CONFIDENCE_LABEL[item.confidence];
@@ -83,7 +83,7 @@ export default function ItemDetailScreen() {
   return (
     <View className="bg-background flex-1">
       <Stack.Screen options={{ title: item.category }} />
-      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 48, gap: 16 }}>
+      <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 56, gap: 18 }}>
         <Thumbnail
           url={item.thumbnail_url}
           category={item.category}

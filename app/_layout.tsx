@@ -129,6 +129,7 @@ function AuthGate() {
     }
   } else {
     content = <AppStack />;
+    statusBarStyle = 'light';
   }
 
   return (

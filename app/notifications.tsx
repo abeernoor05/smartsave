@@ -144,10 +144,19 @@ export default function NotificationsScreen() {
       <ScrollView
         contentContainerStyle={{ paddingBottom: 48 }}
         refreshControl={
-          <RefreshControl refreshing={status === 'loading'} onRefresh={() => void loadItems()} />
+          <RefreshControl
+            refreshing={status === 'loading'}
+            tintColor={COLORS.accent}
+            colors={[COLORS.accent]}
+            onRefresh={() => void loadItems()}
+          />
         }
       >
-        <View className="gap-6 px-4 pt-4">
+        <View className="gap-7 px-5 pt-5">
+          <View
+            className="bg-accent-soft absolute -top-28 -left-24 size-64 rounded-full"
+            pointerEvents="none"
+          />
           <View className="gap-2">
             <Typography type="body-sm" color="muted">
               Every reminder the deadline rules produce, one per deadline entry per stage, with the

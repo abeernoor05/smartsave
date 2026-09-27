@@ -64,7 +64,7 @@ export default function SearchScreen() {
     <View className="bg-background flex-1">
       <Stack.Screen options={{ title: 'Search results' }} />
 
-      <View className="px-4 pt-4">
+      <View className="px-5 pt-5">
         <SearchField value={query} onChange={setQuery}>
           <SearchField.Group>
             <SearchField.SearchIcon />
@@ -81,7 +81,7 @@ export default function SearchScreen() {
       <FlatList
         data={results}
         keyExtractor={(item: Item) => item.id}
-        contentContainerStyle={{ padding: 16, paddingBottom: 40, gap: 12 }}
+        contentContainerStyle={{ padding: 20, paddingBottom: 48, gap: 14 }}
         keyboardShouldPersistTaps="handled"
         keyboardDismissMode="on-drag"
         ListHeaderComponent={

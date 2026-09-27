@@ -29,7 +29,7 @@ export function ItemCard({ item, showCategory = false }: ItemCardProps) {
       onPress={() => router.push({ pathname: '/item/[id]', params: { id: item.id } })}
       style={({ pressed }) => ({ opacity: pressed ? 0.9 : 1 })}
     >
-      <Card className="border-border border p-3">
+      <Card className="border-border bg-surface/95 rounded-3xl border p-3">
         <View className="flex-row gap-3">
           <Thumbnail
             url={item.thumbnail_url}

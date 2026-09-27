@@ -59,13 +59,22 @@ export default function HomeScreen() {
         contentContainerStyle={{ paddingBottom: 40 }}
         keyboardShouldPersistTaps="handled"
         refreshControl={
-          <RefreshControl refreshing={status === 'loading'} onRefresh={() => void loadItems()} />
+          <RefreshControl
+            refreshing={status === 'loading'}
+            tintColor={COLORS.accent}
+            colors={[COLORS.accent]}
+            onRefresh={() => void loadItems()}
+          />
         }
       >
-        <View className="pt-safe-offset-4 gap-6 px-4">
+        <View className="pt-safe-offset-5 gap-7 px-5">
+          <View
+            className="bg-accent-soft absolute -top-24 -right-28 size-72 rounded-full"
+            pointerEvents="none"
+          />
           <View className="flex-row items-center justify-between gap-3">
             <View className="flex-1">
-              <Typography.Heading type="h3" weight="bold">
+              <Typography.Heading type="h2" weight="bold">
                 SmartSave
               </Typography.Heading>
               <Typography type="body-sm" color="muted">
@@ -105,11 +114,11 @@ export default function HomeScreen() {
             <Pressable
               accessibilityLabel="Save a link"
               accessibilityRole="button"
-              className="bg-accent size-11 items-center justify-center rounded-2xl"
+              className="size-11 items-center justify-center rounded-2xl bg-white"
               onPress={() => router.push('/add-link')}
-              style={({ pressed }) => ({ opacity: pressed ? 0.9 : 1 })}
+              style={({ pressed }) => ({ opacity: pressed ? 0.82 : 1 })}
             >
-              <Plus size={22} color={COLORS.onAccent} />
+              <Plus size={22} color={COLORS.accent} />
             </Pressable>
           </View>
 

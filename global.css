@@ -6,89 +6,103 @@
 @import 'heroui-native/styles';
 
 /*
- * SmartSave theme — minimal, card-based, light neutral.
- *
- * Brand accent is a deep blue. Everything structural is neutral grey:
- * a soft grey app background with white cards and hairline borders.
- * Colour is reserved for the accent and for deadline urgency.
- *
- * Semantic token overrides must live inside the Uniwind light/dark theme
- * variants, otherwise native keeps HeroUI's default blue.
- *
- * Hex mirrors of these values live in lib/colors.ts for icon and other
- * native colour props that cannot read a className.
+ * SmartSave theme — the signed-in experience continues the welcome screen's
+ * midnight navy canvas, violet glow, translucent surfaces, and crisp type.
+ * Deadline colours stay semantic so urgency remains immediately readable.
+ * Native hex mirrors live in lib/colors.ts.
  */
 
 @layer theme {
   :root {
     @variant light {
-      /* Base */
-      --background: oklch(0.97 0.003 265);
-      --foreground: oklch(0.24 0.02 265);
+      --background: oklch(0.145 0.018 285);
+      --foreground: oklch(0.975 0.008 285);
 
-      --surface: oklch(1 0 0);
+      --surface: oklch(0.205 0.028 285);
       --surface-foreground: var(--foreground);
-      --surface-secondary: oklch(0.955 0.004 265);
+      --surface-secondary: oklch(0.245 0.036 285);
       --surface-secondary-foreground: var(--foreground);
-      --surface-tertiary: oklch(0.925 0.006 265);
+      --surface-tertiary: oklch(0.29 0.045 285);
       --surface-tertiary-foreground: var(--foreground);
 
-      --overlay: oklch(1 0 0);
+      --overlay: oklch(0.19 0.026 285);
       --overlay-foreground: var(--foreground);
+      --backdrop: oklch(0.08 0.018 285 / 0.78);
 
-      --muted: oklch(0.55 0.02 262);
-      --default: oklch(0.955 0.004 265);
+      --muted: oklch(0.73 0.025 285);
+      --default: oklch(0.255 0.035 285);
       --default-foreground: var(--foreground);
 
-      /* Brand — deep blue */
-      --accent: oklch(0.42 0.17 264);
+      --accent: oklch(0.62 0.17 285);
       --accent-foreground: oklch(1 0 0);
-      --focus: var(--accent);
-      --link: var(--accent);
+      --focus: oklch(0.72 0.16 285);
+      --link: oklch(0.74 0.14 285);
 
-      /* Fields */
-      --field-background: oklch(0.97 0.003 265);
+      --field-background: oklch(0.205 0.028 285);
       --field-foreground: var(--foreground);
       --field-placeholder: var(--muted);
-      --field-border: oklch(0.92 0.005 265);
+      --field-border: oklch(0.38 0.045 285);
 
-      /* Status — aligned with the deadline palette */
-      --danger: oklch(0.5 0.19 28);
+      --success: oklch(0.7 0.14 155);
+      --success-foreground: oklch(0.14 0.02 155);
+      --danger: oklch(0.68 0.18 25);
       --danger-foreground: oklch(1 0 0);
-      --warning: oklch(0.45 0.12 60);
-      --warning-foreground: oklch(1 0 0);
+      --warning: oklch(0.78 0.14 75);
+      --warning-foreground: oklch(0.2 0.04 65);
 
-      /* Lines */
-      --border: oklch(0.92 0.005 265);
-      --separator: oklch(0.9 0.006 265);
+      --border: oklch(0.37 0.04 285 / 0.72);
+      --separator: oklch(0.39 0.035 285 / 0.65);
 
-      /* Soft, single-layer card shadow */
-      --surface-shadow: 0 1px 2px 0 rgba(16, 24, 40, 0.04), 0 0 1px 0 rgba(16, 24, 40, 0.06);
-      --field-shadow: 0 1px 2px 0 rgba(16, 24, 40, 0.03);
+      --surface-shadow: 0 10px 30px 0 rgba(0, 0, 0, 0.18), 0 1px 0 0 rgba(255, 255, 255, 0.04);
+      --overlay-shadow: 0 18px 48px 0 rgba(0, 0, 0, 0.34);
+      --field-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.03);
     }
 
     @variant dark {
-      --accent: oklch(0.55 0.17 264);
+      --background: oklch(0.145 0.018 285);
+      --foreground: oklch(0.975 0.008 285);
+      --surface: oklch(0.205 0.028 285);
+      --surface-foreground: var(--foreground);
+      --surface-secondary: oklch(0.245 0.036 285);
+      --surface-secondary-foreground: var(--foreground);
+      --surface-tertiary: oklch(0.29 0.045 285);
+      --surface-tertiary-foreground: var(--foreground);
+      --overlay: oklch(0.19 0.026 285);
+      --overlay-foreground: var(--foreground);
+      --backdrop: oklch(0.08 0.018 285 / 0.78);
+      --muted: oklch(0.73 0.025 285);
+      --default: oklch(0.255 0.035 285);
+      --default-foreground: var(--foreground);
+      --accent: oklch(0.62 0.17 285);
       --accent-foreground: oklch(1 0 0);
-      --focus: var(--accent);
-      --link: var(--accent);
+      --focus: oklch(0.72 0.16 285);
+      --link: oklch(0.74 0.14 285);
+      --field-background: oklch(0.205 0.028 285);
+      --field-foreground: var(--foreground);
+      --field-placeholder: var(--muted);
+      --field-border: oklch(0.38 0.045 285);
+      --success: oklch(0.7 0.14 155);
+      --success-foreground: oklch(0.14 0.02 155);
+      --danger: oklch(0.68 0.18 25);
+      --danger-foreground: oklch(1 0 0);
+      --warning: oklch(0.78 0.14 75);
+      --warning-foreground: oklch(0.2 0.04 65);
+      --border: oklch(0.37 0.04 285 / 0.72);
+      --separator: oklch(0.39 0.035 285 / 0.65);
+      --surface-shadow: 0 10px 30px 0 rgba(0, 0, 0, 0.18), 0 1px 0 0 rgba(255, 255, 255, 0.04);
+      --overlay-shadow: 0 18px 48px 0 rgba(0, 0, 0, 0.34);
+      --field-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.03);
     }
   }
 }
 
-/*
- * Deadline urgency palette.
- * urgent = red   → overdue, today, or within three days
- * soon   = amber → further out, or a deadline with no date confirmed yet
- * calm   = grey  → items with no deadline at all
- */
 @theme {
-  --color-urgent: oklch(0.5 0.19 28);
-  --color-urgent-soft: oklch(0.955 0.025 25);
-  --color-soon: oklch(0.45 0.12 60);
-  --color-soon-soft: oklch(0.96 0.06 95);
-  --color-calm: oklch(0.45 0.02 262);
-  --color-calm-soft: oklch(0.925 0.006 265);
+  --color-urgent: oklch(0.76 0.15 25);
+  --color-urgent-soft: oklch(0.31 0.09 25);
+  --color-soon: oklch(0.82 0.13 78);
+  --color-soon-soft: oklch(0.31 0.07 70);
+  --color-calm: oklch(0.76 0.035 285);
+  --color-calm-soft: oklch(0.275 0.035 285);
 }
 
 @source './node_modules/heroui-native/lib';

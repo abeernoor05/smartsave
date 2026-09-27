@@ -25,7 +25,7 @@ export function FolderCard({ category, count, dueSoonCount }: FolderCardProps) {
       onPress={() => router.push({ pathname: '/folder/[category]', params: { category } })}
       style={({ pressed }) => ({ opacity: pressed ? 0.9 : 1 })}
     >
-      <Card className="border-border gap-3 border p-4">
+      <Card className="border-border bg-surface/95 min-h-44 gap-4 rounded-3xl border p-4">
         <View className="flex-row items-start justify-between">
           <View className="bg-accent-soft size-10 items-center justify-center rounded-xl">
             <Icon size={19} color={COLORS.accent} />

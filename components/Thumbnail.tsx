@@ -22,7 +22,10 @@ export function Thumbnail({ url, category, width, height, className }: Thumbnail
   if (!source) {
     return (
       <View
-        className={cn('bg-accent-soft items-center justify-center rounded-2xl', className)}
+        className={cn(
+          'bg-accent-soft border-border items-center justify-center rounded-2xl border',
+          className,
+        )}
         style={{ width, height }}
       >
         <Icon size={Math.max(18, Math.min(32, Math.round(width / 3)))} color={COLORS.accent} />

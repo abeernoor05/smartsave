@@ -62,7 +62,7 @@ export function NotificationCard({
       onPress={onPress}
       style={({ pressed }) => ({ opacity: pressed && onPress ? 0.85 : 1 })}
     >
-      <Card className={cn('border-border gap-2.5 border p-3.5', className)}>
+      <Card className={cn('border-border bg-surface/95 gap-3 rounded-3xl border p-4', className)}>
         <View className="flex-row items-center gap-2">
           <View className="bg-accent size-7 items-center justify-center rounded-lg">
             <Bell size={14} color={COLORS.onAccent} />

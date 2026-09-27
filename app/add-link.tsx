@@ -207,7 +207,7 @@ export default function AddLinkScreen() {
   const confidence = draft ? CONFIDENCE_CHIP[draft.confidence] : null;
 
   return (
-    <View className="flex-1 justify-end bg-black/40">
+    <View className="flex-1 justify-end bg-black/75">
       <Pressable
         accessibilityLabel="Close"
         accessibilityRole="button"
@@ -221,7 +221,7 @@ export default function AddLinkScreen() {
           style={{ maxHeight: height * 0.86 }}
           contentContainerStyle={{ padding: 16, paddingBottom: 32 }}
         >
-          <Card className="border-border gap-4 border p-5">
+          <Card className="border-border bg-overlay gap-4 rounded-[28px] border p-5">
             <View className="flex-row items-start justify-between gap-3">
               <View className="flex-1">
                 <Typography.Heading type="h4" weight="bold">

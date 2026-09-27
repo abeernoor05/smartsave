@@ -20,7 +20,7 @@ export function EmptyState({
   onAction,
 }: EmptyStateProps) {
   return (
-    <View className="items-center gap-3 px-6 py-12">
+    <View className="border-border bg-surface/70 mx-1 items-center gap-3 rounded-3xl border px-6 py-10">
       <View className="bg-surface-secondary size-12 items-center justify-center rounded-2xl">
         <Icon size={22} color={COLORS.muted} />
       </View>

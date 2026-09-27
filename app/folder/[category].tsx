@@ -47,7 +47,7 @@ export default function FolderScreen() {
       <FlatList
         data={items}
         keyExtractor={(item: Item) => item.id}
-        contentContainerStyle={{ padding: 16, paddingBottom: 40, gap: 12 }}
+        contentContainerStyle={{ padding: 20, paddingBottom: 48, gap: 14 }}
         ListHeaderComponent={
           <View className="flex-row items-center gap-3 pb-1">
             <View className="bg-accent-soft size-10 items-center justify-center rounded-xl">

@@ -63,7 +63,7 @@ export function DeadlineListItem({
   };
 
   return (
-    <Card className="border-border gap-3 border p-4">
+    <Card className="border-border bg-surface/95 gap-3 rounded-3xl border p-4">
       <View className="flex-row items-start justify-between gap-3">
         <View className="flex-1 gap-1">
           <Typography type="body-sm" weight="bold">

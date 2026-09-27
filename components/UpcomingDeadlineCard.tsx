@@ -29,7 +29,7 @@ export function UpcomingDeadlineCard({ entry }: UpcomingDeadlineCardProps) {
       onPress={() => router.push({ pathname: '/item/[id]', params: { id: item.id } })}
       style={({ pressed }) => ({ opacity: pressed ? 0.9 : 1 })}
     >
-      <Card className="border-border gap-3 border p-4">
+      <Card className="border-border bg-surface/95 min-h-44 gap-4 rounded-3xl border p-4">
         <View className="flex-row items-center justify-between">
           <View className={`rounded-full px-2.5 py-1 ${styles.bgClass}`}>
             <Typography type="body-xs" weight="semibold" className={styles.textClass}>
