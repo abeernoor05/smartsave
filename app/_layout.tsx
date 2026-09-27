@@ -30,7 +30,6 @@ import { AuthProvider, useAuth } from '@/lib/auth';
 import { clearScheduledReminders } from '@/lib/reminders';
 import { useSmartSaveStore } from '@/lib/store';
 import { useReminderSync } from '@/hooks/useReminderSync';
-import { AppBackground } from '@/components/AppBackground';
 import { InstallPrompt } from '@/components/InstallPrompt';
 import { LaunchFlow } from '@/components/LaunchFlow';
 import { SignInScreen } from '@/components/SignInScreen';
@@ -57,36 +56,34 @@ Uniwind.setTheme('light');
 void SplashScreen.preventAutoHideAsync();
 
 function AppStack() {
+  const background = useThemeColor('background');
   const foreground = useThemeColor('foreground');
 
   return (
-    <View className="flex-1">
-      <AppBackground />
-      <Stack
-        screenOptions={{
-          headerStyle: { backgroundColor: '#080A14' },
-          headerTintColor: foreground,
-          headerTitleStyle: { color: foreground },
-          headerShadowVisible: false,
-          contentStyle: { backgroundColor: 'transparent' },
+    <Stack
+      screenOptions={{
+        headerStyle: { backgroundColor: background },
+        headerTintColor: foreground,
+        headerTitleStyle: { color: foreground },
+        headerShadowVisible: false,
+        contentStyle: { backgroundColor: background },
+      }}
+    >
+      <Stack.Screen name="index" options={{ headerShown: false }} />
+      <Stack.Screen
+        name="add-link"
+        options={{
+          presentation: 'modal',
+          animation: 'fade',
+          headerShown: false,
+          contentStyle: { backgroundColor: background },
         }}
-      >
-        <Stack.Screen name="index" options={{ headerShown: false }} />
-        <Stack.Screen
-          name="add-link"
-          options={{
-            presentation: 'transparentModal',
-            animation: 'fade',
-            headerShown: false,
-            contentStyle: { backgroundColor: 'transparent' },
-          }}
-        />
-        <Stack.Screen name="folder/[category]" options={{ title: 'Folder' }} />
-        <Stack.Screen name="item/[id]" options={{ title: 'Saved item' }} />
-        <Stack.Screen name="search" options={{ title: 'Search' }} />
-        <Stack.Screen name="notifications" options={{ title: 'Reminders sent' }} />
-      </Stack>
-    </View>
+      />
+      <Stack.Screen name="folder/[category]" options={{ title: 'Folder' }} />
+      <Stack.Screen name="item/[id]" options={{ title: 'Saved item' }} />
+      <Stack.Screen name="search" options={{ title: 'Search' }} />
+      <Stack.Screen name="notifications" options={{ title: 'Reminders sent' }} />
+    </Stack>
   );
 }
 
@@ -114,8 +111,7 @@ function AuthGate() {
 
   if (isLoading) {
     content = (
-      <View className="flex-1 items-center justify-center">
-        <AppBackground />
+      <View className="bg-background flex-1 items-center justify-center">
         <Spinner />
       </View>
     );

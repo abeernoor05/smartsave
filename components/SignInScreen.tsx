@@ -12,7 +12,6 @@ import {
 import { ArrowLeft, Mail, MailCheck } from 'lucide-react-native';
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native';
 
-import { AppBackground } from '@/components/AppBackground';
 import { SafeAreaView } from '@/components/ui/primitives/SafeAreaView';
 import { useAuth } from '@/lib/auth';
 import { WELCOME_COLORS } from '@/lib/colors';
@@ -85,7 +84,6 @@ export function SignInScreen({ intent = 'signin', onBack }: SignInScreenProps) {
 
   return (
     <View style={styles.screen}>
-      <AppBackground />
       <View pointerEvents="none" style={[styles.glow, styles.glowTop]} />
       <View pointerEvents="none" style={[styles.glow, styles.glowBottom]} />
 
@@ -272,7 +270,7 @@ export function SignInScreen({ intent = 'signin', onBack }: SignInScreenProps) {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: '#080A14',
+    backgroundColor: WELCOME_COLORS.navy,
     overflow: 'hidden',
   },
   safeArea: {

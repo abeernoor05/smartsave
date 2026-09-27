@@ -61,7 +61,7 @@ export default function SearchScreen() {
   const results = rows ?? local;
 
   return (
-    <View className="flex-1 bg-transparent">
+    <View className="bg-background flex-1">
       <Stack.Screen options={{ title: 'Search results' }} />
 
       <View className="px-5 pt-5">
