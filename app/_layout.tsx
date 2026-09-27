@@ -11,7 +11,7 @@ import {
 } from '@expo-google-fonts/inter';
 import Constants, { ExecutionEnvironment } from 'expo-constants';
 import { Platform, View } from 'react-native';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import * as DevClient from 'expo-dev-client';
 import { HeroUINativeProvider, Spinner, useThemeColor } from 'heroui-native';
 import { Uniwind } from 'uniwind';
@@ -30,6 +30,7 @@ import { clearScheduledReminders } from '@/lib/reminders';
 import { useSmartSaveStore } from '@/lib/store';
 import { useReminderSync } from '@/hooks/useReminderSync';
 import { InstallPrompt } from '@/components/InstallPrompt';
+import { LaunchFlow } from '@/components/LaunchFlow';
 import { SignInScreen } from '@/components/SignInScreen';
 
 /**
@@ -87,6 +88,7 @@ function AppStack() {
 /** Nothing renders until we know who is signed in; their items load right after. */
 function AuthGate() {
   const { session, isLoading } = useAuth();
+  const [authIntent, setAuthIntent] = useState<'start' | 'signin' | null>(null);
   const userId = session?.user.id ?? null;
   const loadItems = useSmartSaveStore((state) => state.loadItems);
   const clearItems = useSmartSaveStore((state) => state.clear);
@@ -110,7 +112,18 @@ function AuthGate() {
     );
   }
 
-  if (!session) return <SignInScreen />;
+  if (!session) {
+    if (authIntent) {
+      return <SignInScreen intent={authIntent} onBack={() => setAuthIntent(null)} />;
+    }
+
+    return (
+      <LaunchFlow
+        onGetStarted={() => setAuthIntent('start')}
+        onSignIn={() => setAuthIntent('signin')}
+      />
+    );
+  }
 
   return <AppStack />;
 }

@@ -8,7 +8,7 @@ import {
   TextField,
   Typography,
 } from 'heroui-native';
-import { Bookmark, MailCheck } from 'lucide-react-native';
+import { ArrowLeft, Bookmark, MailCheck } from 'lucide-react-native';
 import { KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native';
 import { useState } from 'react';
 
@@ -16,11 +16,17 @@ import { useAuth } from '@/lib/auth';
 import { COLORS } from '@/lib/colors';
 
 type Step = 'email' | 'code';
+type SignInIntent = 'start' | 'signin';
+
+type SignInScreenProps = {
+  intent?: SignInIntent;
+  onBack?: () => void;
+};
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
 /** Passwordless sign-in: email address, then the 6-digit code we mail out. */
-export function SignInScreen() {
+export function SignInScreen({ intent = 'signin', onBack }: SignInScreenProps) {
   const { requestCode, confirmCode } = useAuth();
   const [step, setStep] = useState<Step>('email');
   const [email, setEmail] = useState('');
@@ -72,6 +78,19 @@ export function SignInScreen() {
           keyboardShouldPersistTaps="handled"
           contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', padding: 24, gap: 24 }}
         >
+          {onBack && step === 'email' ? (
+            <Button
+              accessibilityLabel="Back to welcome"
+              className="self-start"
+              size="sm"
+              variant="ghost"
+              onPress={onBack}
+            >
+              <ArrowLeft color={COLORS.ink} size={18} />
+              <Button.Label>Back</Button.Label>
+            </Button>
+          ) : null}
+
           <View className="items-center gap-3">
             <View className="bg-accent size-14 items-center justify-center rounded-2xl">
               <Bookmark size={26} color={COLORS.onAccent} />
@@ -89,7 +108,7 @@ export function SignInScreen() {
               <>
                 <View className="gap-1">
                   <Typography type="body" weight="bold">
-                    Sign in
+                    {intent === 'start' ? 'Get started' : 'Sign in'}
                   </Typography>
                   <Typography type="body-xs" color="muted">
                     We email a 6-digit code — no password to remember.

@@ -23,3 +23,13 @@ export const COLORS = {
   /** --color-calm, grey badge */
   calm: '#525A69',
 } as const;
+
+/** Native-only palette for the cinematic signed-out welcome flow. */
+export const WELCOME_COLORS = {
+  navy: '#070811',
+  navyFade: 'rgba(7, 8, 17, 0.96)',
+  transparentNavy: 'rgba(7, 8, 17, 0)',
+  violet: '#5B4BCC',
+  violetGlow: '#7567F4',
+  white: '#FFFFFF',
+} as const;
