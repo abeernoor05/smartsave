@@ -9,7 +9,7 @@ import {
   TextField,
   Typography,
 } from 'heroui-native';
-import { ArrowLeft, Bookmark, Mail, MailCheck } from 'lucide-react-native';
+import { ArrowLeft, Mail, MailCheck } from 'lucide-react-native';
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native';
 
 import { LinearGradient } from '@/components/ui/primitives/LinearGradient';
@@ -87,8 +87,8 @@ export function SignInScreen({ intent = 'signin', onBack }: SignInScreenProps) {
   return (
     <View style={styles.screen}>
       <LinearGradient
-        colors={['#080810', '#12102A', '#20175A']}
-        locations={[0, 0.56, 1]}
+        colors={[AUTH_BACKGROUND, '#0B0B18', '#111128']}
+        locations={[0, 0.58, 1]}
         pointerEvents="none"
         style={StyleSheet.absoluteFill}
       />
@@ -135,7 +135,10 @@ export function SignInScreen({ intent = 'signin', onBack }: SignInScreenProps) {
               )}
 
               <View style={styles.brandMark}>
-                <Bookmark color={WELCOME_COLORS.white} fill={WELCOME_COLORS.white} size={20} />
+                <View style={styles.folderIcon}>
+                  <View style={styles.folderTab} />
+                  <View style={styles.folderBody} />
+                </View>
               </View>
             </View>
 
@@ -299,7 +302,7 @@ const styles = StyleSheet.create({
     width: 280,
     height: 280,
     borderRadius: 140,
-    backgroundColor: 'rgba(117, 103, 244, 0.15)',
+    backgroundColor: 'rgba(117, 103, 244, 0.1)',
   },
   glowTop: {
     top: -100,
@@ -324,12 +327,40 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: WELCOME_COLORS.violet,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: 'rgba(255,255,255,0.22)',
+    backgroundColor: 'rgba(255,255,255,0.09)',
     shadowColor: WELCOME_COLORS.violetGlow,
-    shadowOpacity: 0.35,
+    shadowOpacity: 0.22,
     shadowRadius: 16,
     shadowOffset: { width: 0, height: 7 },
-    elevation: 8,
+    elevation: 7,
+  },
+  folderIcon: {
+    width: 22,
+    height: 17,
+    position: 'relative',
+  },
+  folderTab: {
+    position: 'absolute',
+    top: 1,
+    left: 2,
+    width: 10,
+    height: 6,
+    borderTopLeftRadius: 3,
+    borderTopRightRadius: 3,
+    backgroundColor: WELCOME_COLORS.violetGlow,
+  },
+  folderBody: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: 13,
+    borderRadius: 4,
+    borderWidth: 1.5,
+    borderColor: WELCOME_COLORS.white,
+    backgroundColor: 'rgba(117,103,244,0.24)',
   },
   headingBlock: {
     gap: 9,
