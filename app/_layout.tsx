@@ -135,7 +135,7 @@ function AuthGate() {
 
   return (
     <>
-      <StatusBar style={statusBarStyle} translucent backgroundColor="transparent" />
+      <StatusBar style={statusBarStyle} />
       {content}
     </>
   );

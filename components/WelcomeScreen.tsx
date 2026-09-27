@@ -91,7 +91,11 @@ const styles = StyleSheet.create({
     top: 0,
   },
   heroFade: {
-    ...StyleSheet.absoluteFillObject,
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
   },
   content: {
     flex: 1,
