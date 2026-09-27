@@ -12,7 +12,7 @@ import {
 import { ArrowLeft, Mail, MailCheck } from 'lucide-react-native';
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native';
 
-import { LinearGradient } from '@/components/ui/primitives/LinearGradient';
+import { AppBackground } from '@/components/AppBackground';
 import { SafeAreaView } from '@/components/ui/primitives/SafeAreaView';
 import { useAuth } from '@/lib/auth';
 import { WELCOME_COLORS } from '@/lib/colors';
@@ -26,7 +26,6 @@ type SignInScreenProps = {
 };
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
-const AUTH_BACKGROUND = '#080810';
 const AUTH_INK = '#F8F7FF';
 const AUTH_MUTED = '#B8B5C8';
 
@@ -86,12 +85,7 @@ export function SignInScreen({ intent = 'signin', onBack }: SignInScreenProps) {
 
   return (
     <View style={styles.screen}>
-      <LinearGradient
-        colors={[AUTH_BACKGROUND, '#0B0B18', '#111128']}
-        locations={[0, 0.58, 1]}
-        pointerEvents="none"
-        style={StyleSheet.absoluteFill}
-      />
+      <AppBackground />
       <View pointerEvents="none" style={[styles.glow, styles.glowTop]} />
       <View pointerEvents="none" style={[styles.glow, styles.glowBottom]} />
 
@@ -278,7 +272,7 @@ export function SignInScreen({ intent = 'signin', onBack }: SignInScreenProps) {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: AUTH_BACKGROUND,
+    backgroundColor: '#080A14',
     overflow: 'hidden',
   },
   safeArea: {

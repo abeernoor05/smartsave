@@ -54,7 +54,7 @@ export default function HomeScreen() {
   };
 
   return (
-    <View className="bg-background flex-1">
+    <View className="flex-1 bg-transparent">
       <ScrollView
         contentContainerStyle={{ paddingBottom: 40 }}
         keyboardShouldPersistTaps="handled"

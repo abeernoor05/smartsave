@@ -26,7 +26,7 @@ export default function FolderScreen() {
 
   if (!category) {
     return (
-      <View className="bg-background flex-1">
+      <View className="flex-1 bg-transparent">
         <Stack.Screen options={{ title: 'Folder' }} />
         <EmptyState
           icon={FolderOpen}
@@ -40,7 +40,7 @@ export default function FolderScreen() {
   const meta = CATEGORY_META[category];
 
   return (
-    <View className="bg-background flex-1">
+    <View className="flex-1 bg-transparent">
       <Stack.Screen options={{ title: category }} />
       <FlatList
         data={items}

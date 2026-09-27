@@ -4,7 +4,7 @@ import { View } from 'react-native';
 
 export default function NotFoundScreen() {
   return (
-    <View className="bg-background flex-1 items-center justify-center gap-3 p-6">
+    <View className="flex-1 items-center justify-center gap-3 bg-transparent p-6">
       <Stack.Screen options={{ title: 'Not found' }} />
       <Typography type="body" weight="semibold">
         This screen does not exist.

@@ -140,7 +140,7 @@ export default function NotificationsScreen() {
   };
 
   return (
-    <View className="bg-background flex-1">
+    <View className="flex-1 bg-transparent">
       <ScrollView
         contentContainerStyle={{ paddingBottom: 48 }}
         refreshControl={

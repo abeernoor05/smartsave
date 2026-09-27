@@ -51,7 +51,7 @@ export default function ItemDetailScreen() {
 
   if (!item) {
     return (
-      <View className="bg-background flex-1">
+      <View className="flex-1 bg-transparent">
         <Stack.Screen options={{ title: 'Saved item' }} />
         <EmptyState
           icon={FileQuestion}
@@ -73,7 +73,7 @@ export default function ItemDetailScreen() {
     : (thumbnailSource(item.thumbnail_url) ?? fallbackImageSource);
 
   return (
-    <View className="bg-background flex-1">
+    <View className="flex-1 bg-transparent">
       <Stack.Screen options={{ title: item.category }} />
       <ScrollView contentContainerStyle={{ paddingBottom: 56 }}>
         <ImageBackground
