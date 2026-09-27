@@ -1,47 +1,69 @@
-import { Image, Pressable, StyleSheet, View, useWindowDimensions } from 'react-native';
+import { Image, Pressable, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { Zap } from 'lucide-react-native';
 
+import { LinearGradient } from '@/components/ui/primitives/LinearGradient';
+import { SafeAreaView } from '@/components/ui/primitives/SafeAreaView';
 import { WELCOME_COLORS } from '@/lib/colors';
 
-const WELCOME_FRAME = require('@/assets/smartsave-welcome-reference.png');
-const FRAME_ASPECT_RATIO = 409 / 920;
-const MAX_FRAME_WIDTH = 460;
+const WELCOME_HERO = require('@/assets/smartsave-welcome-hero.png');
 
 type WelcomeScreenProps = {
   onGetStarted: () => void;
   onSignIn: () => void;
 };
 
-/** Exact supplied welcome artwork with accessible native interaction regions. */
+/** Native welcome layout with artwork fading directly into the screen canvas. */
 export function WelcomeScreen({ onGetStarted, onSignIn }: WelcomeScreenProps) {
   const { width, height } = useWindowDimensions();
-  const frameWidth = Math.min(width, height * FRAME_ASPECT_RATIO, MAX_FRAME_WIDTH);
-  const frameHeight = frameWidth / FRAME_ASPECT_RATIO;
+  const heroHeight = Math.min(Math.max(height * 0.58, 390), 610);
+  const heroWidth = Math.min(Math.max(width, heroHeight * (2 / 3)), 560);
 
   return (
-    <View style={styles.screen}>
-      <View style={[styles.frame, { width: frameWidth, height: frameHeight }]}>
+    <SafeAreaView style={styles.screen}>
+      <View style={[styles.heroRegion, { height: heroHeight }]}>
         <Image
           accessibilityIgnoresInvertColors
-          resizeMode="contain"
-          source={WELCOME_FRAME}
-          style={{ width: frameWidth, height: frameHeight }}
+          resizeMode="cover"
+          source={WELCOME_HERO}
+          style={[styles.hero, { width: heroWidth, height: heroHeight }]}
         />
-        <Pressable
-          accessibilityHint="Continue to create or access your Smart Save account"
-          accessibilityLabel="Get Started - It's Free"
-          accessibilityRole="button"
-          onPress={onGetStarted}
-          style={({ pressed }) => [styles.getStartedHitArea, pressed && styles.pressed]}
-        />
-        <Pressable
-          accessibilityHint="Continue to email sign in"
-          accessibilityLabel="I already have an account"
-          accessibilityRole="button"
-          onPress={onSignIn}
-          style={({ pressed }) => [styles.signInHitArea, pressed && styles.pressed]}
+        <LinearGradient
+          colors={[WELCOME_COLORS.transparentNavy, WELCOME_COLORS.navyFade, WELCOME_COLORS.navy]}
+          locations={[0, 0.62, 1]}
+          pointerEvents="none"
+          style={styles.heroFade}
         />
       </View>
-    </View>
+
+      <View style={styles.content}>
+        <Text accessibilityRole="header" style={styles.title}>
+          Smart Save
+        </Text>
+
+        <View style={styles.actions}>
+          <Pressable
+            accessibilityHint="Continue to create or access your Smart Save account"
+            accessibilityLabel="Get Started - It's Free"
+            accessibilityRole="button"
+            onPress={onGetStarted}
+            style={({ pressed }) => [styles.primaryButton, pressed && styles.primaryPressed]}
+          >
+            <Zap color="#24134F" fill="#24134F" size={20} strokeWidth={2.2} />
+            <Text style={styles.primaryLabel}>Get Started - It&apos;s Free</Text>
+          </Pressable>
+
+          <Pressable
+            accessibilityHint="Continue to email sign in"
+            accessibilityLabel="I already have an account"
+            accessibilityRole="button"
+            onPress={onSignIn}
+            style={({ pressed }) => [styles.secondaryButton, pressed && styles.secondaryPressed]}
+          >
+            <Text style={styles.secondaryLabel}>I already have an account</Text>
+          </Pressable>
+        </View>
+      </View>
+    </SafeAreaView>
   );
 }
 
@@ -49,30 +71,78 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'center',
     backgroundColor: WELCOME_COLORS.navy,
-  },
-  frame: {
-    position: 'relative',
     overflow: 'hidden',
   },
-  getStartedHitArea: {
-    position: 'absolute',
-    top: '83.35%',
-    left: '5.85%',
-    width: '88.3%',
-    height: '6.3%',
-    borderRadius: 999,
+  heroRegion: {
+    width: '100%',
+    alignItems: 'center',
+    overflow: 'hidden',
   },
-  signInHitArea: {
+  hero: {
     position: 'absolute',
-    top: '90.9%',
-    left: '5.85%',
-    width: '88.3%',
-    height: '5.8%',
-    borderRadius: 999,
+    top: 0,
   },
-  pressed: {
-    backgroundColor: 'rgba(255, 255, 255, 0.12)',
+  heroFade: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  content: {
+    flex: 1,
+    width: '100%',
+    maxWidth: 520,
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 24,
+    paddingBottom: 26,
+    marginTop: -28,
+  },
+  title: {
+    color: WELCOME_COLORS.white,
+    fontFamily: 'Inter_700Bold',
+    fontSize: 40,
+    lineHeight: 48,
+    letterSpacing: -1.5,
+    textAlign: 'center',
+  },
+  actions: {
+    width: '100%',
+    gap: 12,
+  },
+  primaryButton: {
+    minHeight: 58,
+    borderRadius: 29,
+    backgroundColor: '#FFFFFF',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    paddingHorizontal: 22,
+  },
+  primaryPressed: {
+    opacity: 0.86,
+    transform: [{ scale: 0.99 }],
+  },
+  primaryLabel: {
+    color: '#24134F',
+    fontFamily: 'Inter_600SemiBold',
+    fontSize: 16,
+  },
+  secondaryButton: {
+    minHeight: 54,
+    borderRadius: 27,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.28)',
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 22,
+  },
+  secondaryPressed: {
+    backgroundColor: 'rgba(255,255,255,0.15)',
+  },
+  secondaryLabel: {
+    color: '#F0EFF5',
+    fontFamily: 'Inter_400Regular',
+    fontSize: 16,
   },
 });

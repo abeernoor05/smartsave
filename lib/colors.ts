@@ -26,9 +26,9 @@ export const COLORS = {
 
 /** Native-only palette for the cinematic signed-out welcome flow. */
 export const WELCOME_COLORS = {
-  navy: '#070811',
-  navyFade: 'rgba(7, 8, 17, 0.96)',
-  transparentNavy: 'rgba(7, 8, 17, 0)',
+  navy: '#01040F',
+  navyFade: 'rgba(1, 4, 15, 0.96)',
+  transparentNavy: 'rgba(1, 4, 15, 0)',
   violet: '#5B4BCC',
   violetGlow: '#7567F4',
   white: '#FFFFFF',
