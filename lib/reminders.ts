@@ -86,7 +86,7 @@ function dayLabel(days: number): string {
 /**
  * Every reminder one item produces — one per deadline entry per stage — whether
  * it has already gone out or not. The single place notification copy is built,
- * so the scheduler and the notifications screen never drift apart.
+ * so scheduling and notification copy stay consistent.
  */
 export function buildReminders(item: Item): Reminder[] {
   const reminders: Reminder[] = [];
@@ -159,16 +159,6 @@ export function pendingReminders(items: Item[]): Reminder[] {
     .flatMap((item) => remindersForItem(item))
     .sort((a, b) => a.fireAt.localeCompare(b.fireAt));
 }
-
-/** Every reminder in the library, sent ones included, soonest first. */
-export function allReminders(items: Item[]): Reminder[] {
-  return items
-    .flatMap((item) => buildReminders(item))
-    .sort((a, b) => a.fireAt.localeCompare(b.fireAt));
-}
-
-/** Whether the device this build runs on can deliver reminders at all. */
-export const remindersSupported = isSupported;
 
 /** Human-readable line for a reminder, used by the item screen. */
 export function reminderSummary(reminder: Reminder, now: Date = new Date()): string {
