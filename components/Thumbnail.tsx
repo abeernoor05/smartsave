@@ -1,8 +1,7 @@
+import { useEffect, useState } from 'react';
 import { Image, View } from 'react-native';
 
-import { CATEGORY_META } from '@/lib/categories';
-import { COLORS } from '@/lib/colors';
-import { thumbnailSource } from '@/lib/thumbnails';
+import { LOCAL_THUMBNAIL_BY_CATEGORY, thumbnailSource } from '@/lib/thumbnails';
 import type { Category } from '@/lib/types';
 import { cn } from '@/lib/utils';
 
@@ -14,31 +13,27 @@ interface ThumbnailProps {
   className?: string;
 }
 
-/** Preview image for a saved item, falling back to the folder's icon. */
+/** Preview image for a saved item, falling back to representative folder artwork. */
 export function Thumbnail({ url, category, width, height, className }: ThumbnailProps) {
-  const source = thumbnailSource(url);
-  const Icon = CATEGORY_META[category].icon;
+  const [imageFailed, setImageFailed] = useState(false);
+  const fallbackSource = thumbnailSource(LOCAL_THUMBNAIL_BY_CATEGORY[category]);
+  const source = imageFailed ? fallbackSource : (thumbnailSource(url) ?? fallbackSource);
 
-  if (!source) {
-    return (
-      <View
-        className={cn(
-          'bg-accent-soft border-border items-center justify-center rounded-2xl border',
-          className,
-        )}
-        style={{ width, height }}
-      >
-        <Icon size={Math.max(18, Math.min(32, Math.round(width / 3)))} color={COLORS.accent} />
-      </View>
-    );
-  }
+  useEffect(() => {
+    setImageFailed(false);
+  }, [url]);
 
   return (
     <View
       className={cn('bg-surface-secondary overflow-hidden rounded-2xl', className)}
       style={{ width, height }}
     >
-      <Image source={source} resizeMode="cover" style={{ width, height }} />
+      <Image
+        source={source ?? undefined}
+        resizeMode="cover"
+        style={{ width, height }}
+        onError={() => setImageFailed(true)}
+      />
     </View>
   );
 }

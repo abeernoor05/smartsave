@@ -1,18 +1,8 @@
 import { addDays } from 'date-fns';
 import * as Linking from 'expo-linking';
 import { Stack, useLocalSearchParams } from 'expo-router';
-import { Button, Card, Chip, Separator, Typography } from 'heroui-native';
-import {
-  BellRing,
-  CalendarDays,
-  ExternalLink,
-  FileQuestion,
-  FolderOpen,
-  Plus,
-  ScanText,
-  StickyNote,
-  Trash2,
-} from 'lucide-react-native';
+import { Button, Card, Separator, Typography } from 'heroui-native';
+import { BellRing, ExternalLink, FileQuestion, Plus, ScanText, Trash2 } from 'lucide-react-native';
 import { ImageBackground, Pressable, ScrollView, View } from 'react-native';
 import { useMemo, useState } from 'react';
 
@@ -36,16 +26,6 @@ import {
 import { goBackOrReplace } from '@/lib/navigation';
 import { getItemById, useSmartSaveStore } from '@/lib/store';
 import { LOCAL_THUMBNAIL_BY_CATEGORY, thumbnailSource } from '@/lib/thumbnails';
-import type { Confidence } from '@/lib/types';
-
-const CONFIDENCE_LABEL: Record<
-  Confidence,
-  { label: string; color: 'success' | 'warning' | 'default' }
-> = {
-  high: { label: 'High confidence', color: 'success' },
-  medium: { label: 'Medium confidence', color: 'warning' },
-  low: { label: 'Low confidence', color: 'default' },
-};
 
 export default function ItemDetailScreen() {
   const params = useLocalSearchParams<{ id?: string }>();
@@ -79,7 +59,6 @@ export default function ItemDetailScreen() {
 
   const platform = PLATFORM_META[item.platform];
   const PlatformIcon = platform.icon;
-  const confidence = CONFIDENCE_LABEL[item.confidence];
   const primaryDeadline = deadlines.find((deadline) => deadline.date);
   const imageSource =
     thumbnailSource(item.thumbnail_url) ??
@@ -107,9 +86,6 @@ export default function ItemDetailScreen() {
                   {platform.label}
                 </Typography>
               </View>
-              <Chip className="rounded-lg" size="sm" variant="secondary" color={confidence.color}>
-                <Chip.Label>{confidence.label}</Chip.Label>
-              </Chip>
             </View>
 
             <Typography
@@ -142,33 +118,25 @@ export default function ItemDetailScreen() {
         </ImageBackground>
 
         <View className="gap-5 px-5 pt-5">
-          <Card className="border-border bg-surface/95 gap-3 rounded-3xl border p-5">
-            <View className="flex-row items-center gap-2">
-              <View className="bg-accent-soft size-10 items-center justify-center rounded-2xl">
-                <StickyNote size={18} color={COLORS.accent} />
-              </View>
-              <View className="flex-1">
-                <Typography type="body" weight="bold">
-                  Summary
-                </Typography>
-                <Typography type="body-xs" color="muted">
-                  {`Saved ${savedAgo(item.saved_at)}`}
-                </Typography>
-              </View>
+          <View className="gap-2 px-1">
+            <View className="gap-0.5">
+              <Typography type="body" weight="bold">
+                Summary
+              </Typography>
+              <Typography type="body-xs" color="muted">
+                {`Saved ${savedAgo(item.saved_at)}`}
+              </Typography>
             </View>
             <Typography type="body-sm" color="muted">
               {item.ai_summary}
             </Typography>
-          </Card>
+          </View>
 
           {undated.length > 0 ? (
             <Card className="border-border bg-surface/95 gap-3 rounded-3xl border p-5">
-              <View className="flex-row items-center gap-2">
-                <StickyNote size={16} color={COLORS.soon} />
-                <Typography type="body" weight="bold">
-                  Date to confirm
-                </Typography>
-              </View>
+              <Typography type="body" weight="bold">
+                Date to confirm
+              </Typography>
               {undated.map((deadline) => (
                 <View key={deadline.id} className="gap-1">
                   <Typography type="body-sm" weight="semibold">
@@ -190,33 +158,27 @@ export default function ItemDetailScreen() {
             </Typography>
           ) : null}
 
-          <Card className="border-border bg-surface/95 gap-4 rounded-3xl border p-5">
-            <View className="flex-row items-center gap-2">
-              <FolderOpen size={18} color={COLORS.accent} />
-              <Typography type="body" weight="bold">
-                Folder
-              </Typography>
-            </View>
+          <View className="gap-3 px-1">
+            <Typography type="body" weight="bold">
+              Folder
+            </Typography>
             <CategoryPicker
               value={item.category}
               onChange={(category) => void setCategory(item.id, category)}
             />
-          </Card>
+          </View>
 
           <View className="gap-3">
-            <View className="flex-row items-center justify-between gap-3">
-              <View className="flex-1 flex-row items-center gap-2">
-                <CalendarDays size={18} color={COLORS.accent} />
-                <View className="flex-1">
-                  <Typography type="body" weight="bold">
-                    {deadlines.length > 0 ? `Deadlines (${deadlines.length})` : 'Deadlines'}
+            <View className="flex-row items-center justify-between gap-3 px-1">
+              <View className="flex-1">
+                <Typography type="body" weight="bold">
+                  {deadlines.length > 0 ? `Deadlines (${deadlines.length})` : 'Deadlines'}
+                </Typography>
+                {deadlines.length > 0 ? (
+                  <Typography type="body-xs" color="muted">
+                    {`${REMINDER_LEAD_DAYS} days before and again on the day`}
                   </Typography>
-                  {deadlines.length > 0 ? (
-                    <Typography type="body-xs" color="muted">
-                      {`${REMINDER_LEAD_DAYS} days before and again on the day`}
-                    </Typography>
-                  ) : null}
-                </View>
+                ) : null}
               </View>
               <Button
                 size="sm"
