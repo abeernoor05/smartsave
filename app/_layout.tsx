@@ -10,8 +10,9 @@ import {
   useFonts,
 } from '@expo-google-fonts/inter';
 import Constants, { ExecutionEnvironment } from 'expo-constants';
+import { StatusBar } from 'expo-status-bar';
 import { Platform, View } from 'react-native';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import * as DevClient from 'expo-dev-client';
 import { HeroUINativeProvider, Spinner, useThemeColor } from 'heroui-native';
 import { Uniwind } from 'uniwind';
@@ -104,28 +105,37 @@ function AuthGate() {
     }
   }, [userId, loadItems, clearItems]);
 
+  let content: ReactNode;
+  let statusBarStyle: 'light' | 'dark' = 'dark';
+
   if (isLoading) {
-    return (
+    content = (
       <View className="bg-background flex-1 items-center justify-center">
         <Spinner />
       </View>
     );
-  }
-
-  if (!session) {
+  } else if (!session) {
     if (authIntent) {
-      return <SignInScreen intent={authIntent} onBack={() => setAuthIntent(null)} />;
+      content = <SignInScreen intent={authIntent} onBack={() => setAuthIntent(null)} />;
+    } else {
+      statusBarStyle = 'light';
+      content = (
+        <LaunchFlow
+          onGetStarted={() => setAuthIntent('start')}
+          onSignIn={() => setAuthIntent('signin')}
+        />
+      );
     }
-
-    return (
-      <LaunchFlow
-        onGetStarted={() => setAuthIntent('start')}
-        onSignIn={() => setAuthIntent('signin')}
-      />
-    );
+  } else {
+    content = <AppStack />;
   }
 
-  return <AppStack />;
+  return (
+    <>
+      <StatusBar style={statusBarStyle} translucent backgroundColor="transparent" />
+      {content}
+    </>
+  );
 }
 
 export default function RootLayout() {

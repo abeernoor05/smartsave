@@ -31,6 +31,11 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     android: {
       package: process.env.BILT_ANDROID_PACKAGE ?? 'com.yourcompany.yourapp',
     },
+    androidStatusBar: {
+      backgroundColor: '#00000000',
+      barStyle: 'dark-content',
+      translucent: true,
+    },
     web: {
       bundler: 'metro',
       // 'single' = SPA export: one index.html + client routing, so edge serving
