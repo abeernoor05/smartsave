@@ -6,72 +6,98 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withDelay,
-  withSequence,
   withTiming,
 } from 'react-native-reanimated';
-import { Bookmark, Zap } from 'lucide-react-native';
 
 import { WELCOME_COLORS } from '@/lib/colors';
 
-const HERO = require('@/assets/smartsave-welcome-hero.png');
-const SPLASH_DURATION_MS = 1550;
+const CARDS_FRAME = require('@/assets/smartsave-splash-cards.png');
+const FINAL_FRAME = require('@/assets/smartsave-splash-final.png');
+const FRAME_ASPECT_RATIO = 384 / 800;
+const MAX_FRAME_WIDTH = 430;
+const SPLASH_DURATION_MS = 3200;
 
 type LaunchScreenProps = {
   onFinish: () => void;
 };
 
-/** Branded in-app splash shown after the native launch screen releases. */
+/** Animates the loose saved cards into the organized folder. */
 export function LaunchScreen({ onFinish }: LaunchScreenProps) {
   const { width, height } = useWindowDimensions();
-  const artworkOpacity = useSharedValue(0);
-  const artworkScale = useSharedValue(0.94);
-  const markOpacity = useSharedValue(0);
-  const markScale = useSharedValue(0.72);
+  const frameWidth = Math.min(width, height * FRAME_ASPECT_RATIO, MAX_FRAME_WIDTH);
+  const frameHeight = frameWidth / FRAME_ASPECT_RATIO;
+  const cardsOpacity = useSharedValue(1);
+  const cardsTranslateY = useSharedValue(0);
+  const cardsScale = useSharedValue(1);
+  const finalOpacity = useSharedValue(0);
+  const finalScale = useSharedValue(0.985);
   const screenOpacity = useSharedValue(1);
 
   useEffect(() => {
-    artworkOpacity.value = withTiming(0.42, { duration: 650 });
-    artworkScale.value = withTiming(1, { duration: 1100, easing: Easing.out(Easing.cubic) });
-    markOpacity.value = withTiming(1, { duration: 380 });
-    markScale.value = withSequence(
-      withTiming(1.08, { duration: 500, easing: Easing.out(Easing.cubic) }),
-      withTiming(1, { duration: 260 }),
+    cardsTranslateY.value = withDelay(
+      650,
+      withTiming(44, { duration: 1050, easing: Easing.inOut(Easing.cubic) }),
+    );
+    cardsScale.value = withDelay(
+      650,
+      withTiming(0.97, { duration: 1050, easing: Easing.inOut(Easing.cubic) }),
+    );
+    cardsOpacity.value = withDelay(1120, withTiming(0, { duration: 620 }));
+    finalOpacity.value = withDelay(1080, withTiming(1, { duration: 720 }));
+    finalScale.value = withDelay(
+      1080,
+      withTiming(1, { duration: 720, easing: Easing.out(Easing.cubic) }),
     );
     screenOpacity.value = withDelay(
-      1220,
-      withTiming(0, { duration: 330 }, (finished) => {
+      2860,
+      withTiming(0, { duration: 340 }, (finished) => {
         if (finished) runOnJS(onFinish)();
       }),
     );
-  }, [artworkOpacity, artworkScale, markOpacity, markScale, onFinish, screenOpacity]);
+  }, [
+    cardsOpacity,
+    cardsScale,
+    cardsTranslateY,
+    finalOpacity,
+    finalScale,
+    onFinish,
+    screenOpacity,
+  ]);
 
-  const artworkStyle = useAnimatedStyle(() => ({
-    opacity: artworkOpacity.value,
-    transform: [{ scale: artworkScale.value }],
+  const cardsStyle = useAnimatedStyle(() => ({
+    opacity: cardsOpacity.value,
+    transform: [{ translateY: cardsTranslateY.value }, { scale: cardsScale.value }],
   }));
-  const markStyle = useAnimatedStyle(() => ({
-    opacity: markOpacity.value,
-    transform: [{ scale: markScale.value }],
+  const finalStyle = useAnimatedStyle(() => ({
+    opacity: finalOpacity.value,
+    transform: [{ scale: finalScale.value }],
   }));
   const screenStyle = useAnimatedStyle(() => ({ opacity: screenOpacity.value }));
+  const frameStyle = { width: frameWidth, height: frameHeight };
 
   return (
-    <Animated.View accessibilityLabel="SmartSave is opening" style={[styles.screen, screenStyle]}>
-      <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFill, artworkStyle]}>
-        <Image
-          source={HERO}
-          resizeMode="cover"
-          style={{ width, height }}
-          accessibilityIgnoresInvertColors
-        />
-      </Animated.View>
-
-      <Animated.View style={[styles.mark, markStyle]}>
-        <Bookmark color={WELCOME_COLORS.white} size={32} strokeWidth={2.4} />
-        <View style={styles.boltBadge}>
-          <Zap color={WELCOME_COLORS.navy} fill={WELCOME_COLORS.navy} size={12} />
-        </View>
-      </Animated.View>
+    <Animated.View
+      accessibilityLabel="Smart Save is organizing your saved cards"
+      style={[styles.screen, screenStyle]}
+    >
+      <View style={[styles.frame, frameStyle]}>
+        <Animated.View style={[StyleSheet.absoluteFill, cardsStyle]}>
+          <Image
+            accessibilityIgnoresInvertColors
+            resizeMode="contain"
+            source={CARDS_FRAME}
+            style={{ width: frameWidth, height: frameHeight }}
+          />
+        </Animated.View>
+        <Animated.View style={[StyleSheet.absoluteFill, finalStyle]}>
+          <Image
+            accessibilityIgnoresInvertColors
+            resizeMode="contain"
+            source={FINAL_FRAME}
+            style={{ width: frameWidth, height: frameHeight }}
+          />
+        </Animated.View>
+      </View>
     </Animated.View>
   );
 }
@@ -85,28 +111,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: WELCOME_COLORS.navy,
   },
-  mark: {
-    width: 78,
-    height: 78,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 24,
-    backgroundColor: WELCOME_COLORS.violet,
-    shadowColor: WELCOME_COLORS.violetGlow,
-    shadowOpacity: 0.5,
-    shadowRadius: 24,
-    shadowOffset: { width: 0, height: 10 },
-    elevation: 14,
-  },
-  boltBadge: {
-    position: 'absolute',
-    right: -5,
-    bottom: -5,
-    width: 27,
-    height: 27,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 14,
-    backgroundColor: WELCOME_COLORS.white,
+  frame: {
+    position: 'relative',
+    overflow: 'hidden',
+    backgroundColor: WELCOME_COLORS.navy,
   },
 });
