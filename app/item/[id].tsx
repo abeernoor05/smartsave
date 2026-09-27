@@ -4,7 +4,7 @@ import { Stack, useLocalSearchParams } from 'expo-router';
 import { Button, Card, Separator, Typography } from 'heroui-native';
 import { BellRing, ExternalLink, FileQuestion, Plus, ScanText, Trash2 } from 'lucide-react-native';
 import { ImageBackground, Pressable, ScrollView, View } from 'react-native';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { CategoryPicker } from '@/components/CategoryPicker';
 import { DeadlineListItem } from '@/components/DeadlineListItem';
@@ -37,10 +37,17 @@ export default function ItemDetailScreen() {
   const removeItem = useSmartSaveStore((state) => state.removeItem);
   const storeError = useSmartSaveStore((state) => state.error);
   const [isCaptionExpanded, setIsCaptionExpanded] = useState(false);
+  const [heroImageFailed, setHeroImageFailed] = useState(false);
 
   const item = getItemById(items, params.id);
+  const thumbnailUrl = item?.thumbnail_url ?? '';
+  const category = item?.category;
   const deadlines = useMemo(() => (item ? sortDeadlines(realDeadlines(item)) : []), [item]);
   const undated = useMemo(() => (item ? undatedDeadlines(item) : []), [item]);
+
+  useEffect(() => {
+    setHeroImageFailed(false);
+  }, [thumbnailUrl, category]);
 
   if (!item) {
     return (
@@ -60,9 +67,10 @@ export default function ItemDetailScreen() {
   const platform = PLATFORM_META[item.platform];
   const PlatformIcon = platform.icon;
   const primaryDeadline = deadlines.find((deadline) => deadline.date);
-  const imageSource =
-    thumbnailSource(item.thumbnail_url) ??
-    thumbnailSource(LOCAL_THUMBNAIL_BY_CATEGORY[item.category]);
+  const fallbackImageSource = thumbnailSource(LOCAL_THUMBNAIL_BY_CATEGORY[item.category]);
+  const imageSource = heroImageFailed
+    ? fallbackImageSource
+    : (thumbnailSource(item.thumbnail_url) ?? fallbackImageSource);
 
   return (
     <View className="bg-background flex-1">
@@ -72,6 +80,7 @@ export default function ItemDetailScreen() {
           source={imageSource ?? undefined}
           resizeMode="cover"
           style={{ width: '100%', height: 330 }}
+          onError={() => setHeroImageFailed(true)}
         >
           <LinearGradient
             colors={['rgba(8,8,16,0.08)', 'rgba(8,8,16,0.28)', COLORS.imageOverlayBottom]}
@@ -164,7 +173,7 @@ export default function ItemDetailScreen() {
             </Typography>
             <CategoryPicker
               value={item.category}
-              onChange={(category) => void setCategory(item.id, category)}
+              onChange={(selectedCategory) => void setCategory(item.id, selectedCategory)}
             />
           </View>
 
@@ -263,9 +272,6 @@ export default function ItemDetailScreen() {
               <ExternalLink size={16} color={COLORS.focalInk} />
               <Button.Label className="text-focal-foreground">Open original link</Button.Label>
             </Button>
-            <Typography type="body-xs" color="muted" align="center" numberOfLines={1}>
-              {item.original_url}
-            </Typography>
 
             <Button
               variant="danger-soft"

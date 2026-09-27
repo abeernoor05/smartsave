@@ -7,7 +7,6 @@ import { useMemo } from 'react';
 import { EmptyState } from '@/components/EmptyState';
 import { ItemCard } from '@/components/ItemCard';
 import { CATEGORY_META } from '@/lib/categories';
-import { COLORS } from '@/lib/colors';
 import { itemsInCategory, useSmartSaveStore } from '@/lib/store';
 import { CATEGORIES, type Category, type Item } from '@/lib/types';
 
@@ -39,7 +38,6 @@ export default function FolderScreen() {
   }
 
   const meta = CATEGORY_META[category];
-  const FolderIcon = meta.icon;
 
   return (
     <View className="bg-background flex-1">
@@ -49,18 +47,13 @@ export default function FolderScreen() {
         keyExtractor={(item: Item) => item.id}
         contentContainerStyle={{ padding: 20, paddingBottom: 48, gap: 14 }}
         ListHeaderComponent={
-          <View className="flex-row items-center gap-3 pb-1">
-            <View className="bg-accent-soft size-10 items-center justify-center rounded-xl">
-              <FolderIcon size={19} color={COLORS.accent} />
-            </View>
-            <View className="flex-1">
-              <Typography type="body" weight="bold">
-                {items.length === 1 ? '1 saved item' : `${items.length} saved items`}
-              </Typography>
-              <Typography type="body-xs" color="muted">
-                {meta.tagline}
-              </Typography>
-            </View>
+          <View className="gap-0.5 pb-1">
+            <Typography type="body" weight="bold">
+              {items.length === 1 ? '1 saved item' : `${items.length} saved items`}
+            </Typography>
+            <Typography type="body-xs" color="muted">
+              {meta.tagline}
+            </Typography>
           </View>
         }
         ListEmptyComponent={
