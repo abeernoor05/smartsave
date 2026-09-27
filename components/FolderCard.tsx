@@ -18,7 +18,6 @@ interface FolderCardProps {
 /** Large image-backed dashboard folder card with item and deadline counts. */
 export function FolderCard({ category, count, dueSoonCount }: FolderCardProps) {
   const meta = CATEGORY_META[category];
-  const Icon = meta.icon;
   const imageSource = thumbnailSource(LOCAL_THUMBNAIL_BY_CATEGORY[category]);
 
   return (
@@ -42,10 +41,7 @@ export function FolderCard({ category, count, dueSoonCount }: FolderCardProps) {
           />
 
           <View className="flex-1 justify-between p-5">
-            <View className="flex-row items-start justify-between">
-              <View className="size-11 items-center justify-center rounded-2xl border border-white/20 bg-black/35">
-                <Icon size={20} color={COLORS.onAccent} />
-              </View>
+            <View className="items-end">
               <View className="flex-row items-center gap-1.5 rounded-full border border-white/20 bg-black/45 px-3 py-2">
                 <Typography type="body-xs" weight="semibold" style={{ color: COLORS.onAccent }}>
                   {count === 1 ? '1 item' : `${count} items`}
