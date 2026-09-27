@@ -85,13 +85,13 @@ export function NotificationCard({
         </View>
 
         <View className="flex-row flex-wrap items-center gap-1.5">
-          <View className={cn('rounded-full px-2 py-1', styles.bgClass)}>
+          <View className={cn('rounded-lg px-2 py-1', styles.bgClass)}>
             <Typography type="body-xs" weight="semibold" className={styles.textClass}>
               {STAGE_LABELS[reminder.stage]}
             </Typography>
           </View>
           {CategoryIcon && item ? (
-            <View className="bg-surface-secondary flex-row items-center gap-1 rounded-full px-2 py-1">
+            <View className="bg-surface-secondary flex-row items-center gap-1 rounded-lg px-2 py-1">
               <CategoryIcon size={11} color={COLORS.muted} />
               <Typography type="body-xs" color="muted">
                 {item.category}

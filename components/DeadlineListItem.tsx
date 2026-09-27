@@ -75,7 +75,7 @@ export function DeadlineListItem({
               <Typography type="body-xs" color="muted">
                 {formatDate(deadline.date)}
               </Typography>
-              <View className={`self-start rounded-full px-2 py-1 ${styles.bgClass}`}>
+              <View className={`self-start rounded-lg px-2 py-1 ${styles.bgClass}`}>
                 <Typography type="body-xs" weight="semibold" className={styles.textClass}>
                   {relativeDeadlineLabel(deadline.date)}
                 </Typography>

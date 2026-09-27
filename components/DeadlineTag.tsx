@@ -19,7 +19,7 @@ interface ExtraCountProps {
 function ExtraCount({ count }: ExtraCountProps) {
   if (count <= 0) return null;
   return (
-    <View className="bg-surface-secondary rounded-full px-2 py-1">
+    <View className="bg-surface-secondary rounded-lg px-2 py-1">
       <Typography type="body-xs" weight="medium" color="muted">
         {`+${count}`}
       </Typography>
@@ -40,7 +40,7 @@ export function DeadlineTag({ date, extraCount = 0, className }: DeadlineTagProp
 
   return (
     <View className={cn('flex-row items-center gap-1.5', className)}>
-      <View className={cn('flex-row items-center gap-1 rounded-full px-2.5 py-1', styles.bgClass)}>
+      <View className={cn('flex-row items-center gap-1 rounded-lg px-2.5 py-1', styles.bgClass)}>
         <CalendarClock size={12} color={styles.color} />
         <Typography type="body-xs" weight="semibold" className={styles.textClass}>
           {`${relativeDeadlineLabel(date)} · ${formatShortDate(date)}`}
@@ -63,7 +63,7 @@ export function UnscheduledTag({ extraCount = 0, className }: UnscheduledTagProp
     <View className={cn('flex-row items-center gap-1.5', className)}>
       <View
         className={cn(
-          'flex-row items-center gap-1 rounded-full px-2.5 py-1',
+          'flex-row items-center gap-1 rounded-lg px-2.5 py-1',
           UNCONFIRMED_STYLE.bgClass,
         )}
       >
@@ -87,7 +87,7 @@ export function NudgeTag({ date, className }: NudgeTagProps) {
   return (
     <View
       className={cn(
-        'flex-row items-center rounded-full px-2.5 py-1',
+        'flex-row items-center rounded-lg px-2.5 py-1',
         NO_DEADLINE_STYLE.bgClass,
         className,
       )}

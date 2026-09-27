@@ -109,7 +109,7 @@ export function SignInScreen({ intent = 'signin', onBack }: SignInScreenProps) {
               {onBack && step === 'email' ? (
                 <Button
                   accessibilityLabel="Back to welcome"
-                  className="size-11 rounded-full border border-white/15 bg-white/10"
+                  className="size-11 rounded-lg border border-white/15 bg-white/10"
                   isIconOnly
                   variant="ghost"
                   onPress={onBack}
@@ -119,7 +119,7 @@ export function SignInScreen({ intent = 'signin', onBack }: SignInScreenProps) {
               ) : step === 'code' ? (
                 <Button
                   accessibilityLabel="Back to email"
-                  className="size-11 rounded-full border border-white/15 bg-white/10"
+                  className="size-11 rounded-lg border border-white/15 bg-white/10"
                   isIconOnly
                   variant="ghost"
                   onPress={() => {
@@ -160,7 +160,7 @@ export function SignInScreen({ intent = 'signin', onBack }: SignInScreenProps) {
             </View>
 
             <View style={styles.cardShadow}>
-              <Card className="gap-5 rounded-[28px] border border-white/15 bg-white/10 p-5">
+              <Card className="gap-5 rounded-3xl border border-white/15 bg-white/10 p-5">
                 {step === 'email' ? (
                   <>
                     <TextField isInvalid={error !== null}>
@@ -324,7 +324,7 @@ const styles = StyleSheet.create({
   brandMark: {
     width: 44,
     height: 44,
-    borderRadius: 14,
+    borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: StyleSheet.hairlineWidth,
@@ -366,7 +366,7 @@ const styles = StyleSheet.create({
     gap: 9,
   },
   cardShadow: {
-    borderRadius: 28,
+    borderRadius: 12,
     shadowColor: '#000000',
     shadowOpacity: 0.28,
     shadowRadius: 28,
@@ -381,7 +381,7 @@ const styles = StyleSheet.create({
   codeIcon: {
     width: 42,
     height: 42,
-    borderRadius: 14,
+    borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'rgba(117, 103, 244, 0.18)',

@@ -15,6 +15,7 @@
 @layer theme {
   :root {
     @variant light {
+      --radius: 0.25rem;
       --background: oklch(0.145 0.018 285);
       --foreground: oklch(0.975 0.008 285);
 
@@ -59,6 +60,7 @@
     }
 
     @variant dark {
+      --radius: 0.25rem;
       --background: oklch(0.145 0.018 285);
       --foreground: oklch(0.975 0.008 285);
       --surface: oklch(0.205 0.028 285);

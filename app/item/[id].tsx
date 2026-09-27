@@ -101,13 +101,13 @@ export default function ItemDetailScreen() {
           />
           <View className="flex-1 justify-end gap-3 px-5 pb-6">
             <View className="flex-row flex-wrap items-center gap-2">
-              <View className="flex-row items-center gap-1.5 rounded-full border border-white/20 bg-black/45 px-2.5 py-1">
+              <View className="flex-row items-center gap-1.5 rounded-lg border border-white/20 bg-black/45 px-2.5 py-1">
                 <PlatformIcon size={13} color={COLORS.onAccent} />
                 <Typography type="body-xs" weight="medium" style={{ color: COLORS.onAccent }}>
                   {platform.label}
                 </Typography>
               </View>
-              <Chip size="sm" variant="secondary" color={confidence.color}>
+              <Chip className="rounded-lg" size="sm" variant="secondary" color={confidence.color}>
                 <Chip.Label>{confidence.label}</Chip.Label>
               </Chip>
             </View>
@@ -127,7 +127,7 @@ export default function ItemDetailScreen() {
                   <Typography type="body-sm" weight="semibold" style={{ color: COLORS.onAccent }}>
                     {formatDate(primaryDeadline.date)}
                   </Typography>
-                  <View className="size-1 rounded-full bg-white/70" />
+                  <View className="size-1 rounded-lg bg-white/70" />
                   <Typography type="body-sm" style={{ color: COLORS.onImageMuted }}>
                     {relativeDeadlineLabel(primaryDeadline.date)}
                   </Typography>

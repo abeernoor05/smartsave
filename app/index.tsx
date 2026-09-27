@@ -114,7 +114,7 @@ export default function HomeScreen() {
             <Pressable
               accessibilityLabel="Save a link"
               accessibilityRole="button"
-              className="size-11 items-center justify-center rounded-2xl bg-white"
+              className="size-11 items-center justify-center rounded-lg bg-white"
               onPress={() => router.push('/add-link')}
               style={({ pressed }) => ({ opacity: pressed ? 0.82 : 1 })}
             >

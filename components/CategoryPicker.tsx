@@ -29,7 +29,7 @@ export function CategoryPicker({ value, onChange }: CategoryPickerProps) {
           >
             <View
               className={cn(
-                'flex-row items-center gap-1.5 rounded-full border px-3 py-2',
+                'flex-row items-center gap-1.5 rounded-lg border px-3 py-2',
                 isSelected ? 'bg-accent border-accent' : 'bg-surface-secondary/80 border-border',
               )}
             >

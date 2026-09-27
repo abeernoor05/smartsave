@@ -48,7 +48,7 @@ export function UpcomingDeadlineCard({ entry }: UpcomingDeadlineCardProps) {
 
           <View className="min-h-44 justify-between gap-4 p-4">
             <View className="flex-row items-center justify-between">
-              <View className={`rounded-full px-2.5 py-1 ${styles.bgClass}`}>
+              <View className={`rounded-lg px-2.5 py-1 ${styles.bgClass}`}>
                 <Typography type="body-xs" weight="semibold" className={styles.textClass}>
                   {relativeDeadlineLabel(deadline.date)}
                 </Typography>
@@ -73,7 +73,7 @@ export function UpcomingDeadlineCard({ entry }: UpcomingDeadlineCardProps) {
             </View>
 
             <View className="flex-row items-center gap-2">
-              <View className="flex-row items-center gap-1 rounded-full border border-white/20 bg-black/45 px-2 py-1">
+              <View className="flex-row items-center gap-1 rounded-lg border border-white/20 bg-black/45 px-2 py-1">
                 <Icon size={12} color={COLORS.onAccent} />
                 <Typography type="body-xs" weight="medium" style={{ color: COLORS.onAccent }}>
                   {item.category}

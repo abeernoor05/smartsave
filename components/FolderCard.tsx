@@ -28,7 +28,7 @@ export function FolderCard({ category, count, dueSoonCount }: FolderCardProps) {
       onPress={() => router.push({ pathname: '/folder/[category]', params: { category } })}
       style={({ pressed }) => ({ opacity: pressed ? 0.88 : 1 })}
     >
-      <View className="border-border bg-surface h-52 overflow-hidden rounded-[28px] border">
+      <View className="border-border bg-surface h-52 overflow-hidden rounded-3xl border">
         <ImageBackground
           source={imageSource ?? undefined}
           resizeMode="cover"
@@ -42,7 +42,7 @@ export function FolderCard({ category, count, dueSoonCount }: FolderCardProps) {
 
           <View className="flex-1 justify-between p-5">
             <View className="items-end">
-              <View className="flex-row items-center gap-1.5 rounded-full border border-white/20 bg-black/45 px-3 py-2">
+              <View className="flex-row items-center gap-1.5 rounded-lg border border-white/20 bg-black/45 px-3 py-2">
                 <Typography type="body-xs" weight="semibold" style={{ color: COLORS.onAccent }}>
                   {count === 1 ? '1 item' : `${count} items`}
                 </Typography>

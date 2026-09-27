@@ -221,7 +221,7 @@ export default function AddLinkScreen() {
           style={{ maxHeight: height * 0.86 }}
           contentContainerStyle={{ padding: 16, paddingBottom: 32 }}
         >
-          <Card className="border-border bg-overlay gap-4 rounded-[28px] border p-5">
+          <Card className="border-border bg-overlay gap-4 rounded-3xl border p-5">
             <View className="flex-row items-start justify-between gap-3">
               <View className="flex-1">
                 <Typography.Heading type="h4" weight="bold">
@@ -360,7 +360,12 @@ export default function AddLinkScreen() {
                     {PLATFORM_META[draft.platform].label}
                   </Typography>
                   {confidence ? (
-                    <Chip size="sm" variant="secondary" color={confidence.color}>
+                    <Chip
+                      className="rounded-lg"
+                      size="sm"
+                      variant="secondary"
+                      color={confidence.color}
+                    >
                       <Chip.Label>{confidence.label}</Chip.Label>
                     </Chip>
                   ) : null}

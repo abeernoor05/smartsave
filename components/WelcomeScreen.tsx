@@ -125,7 +125,7 @@ const styles = StyleSheet.create({
   },
   primaryButton: {
     minHeight: 58,
-    borderRadius: 29,
+    borderRadius: 10,
     backgroundColor: '#FFFFFF',
     flexDirection: 'row',
     alignItems: 'center',
@@ -144,7 +144,7 @@ const styles = StyleSheet.create({
   },
   secondaryButton: {
     minHeight: 54,
-    borderRadius: 27,
+    borderRadius: 10,
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.28)',
     backgroundColor: 'rgba(255,255,255,0.08)',

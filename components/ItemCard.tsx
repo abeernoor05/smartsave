@@ -59,7 +59,7 @@ export function ItemCard({ item, showCategory = false }: ItemCardProps) {
                 {`${platform.label} · saved ${savedAgo(item.saved_at)}`}
               </Typography>
               {showCategory ? (
-                <View className="bg-surface-secondary flex-row items-center gap-1 rounded-full px-2 py-0.5">
+                <View className="bg-surface-secondary flex-row items-center gap-1 rounded-lg px-2 py-0.5">
                   <CategoryIcon size={11} color={COLORS.accent} />
                   <Typography type="body-xs" weight="medium" color="muted">
                     {item.category}
