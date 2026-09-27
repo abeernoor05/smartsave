@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { ArrowRight, CalendarCheck, LogOut, Plus } from 'lucide-react-native';
+import { ArrowRight, LogOut, Plus } from 'lucide-react-native';
 import { Button, Card, SearchField, Spinner, Typography } from 'heroui-native';
 import { Pressable, RefreshControl, ScrollView, View } from 'react-native';
 import { useMemo, useState } from 'react';
@@ -8,7 +8,7 @@ import { FolderCard } from '@/components/FolderCard';
 import { UpcomingDeadlineCard } from '@/components/UpcomingDeadlineCard';
 import { useAuth } from '@/lib/auth';
 import { COLORS } from '@/lib/colors';
-import { daysUntil, upcomingDeadlines } from '@/lib/deadlines';
+import { allUpcomingDeadlines, daysUntil, upcomingDeadlines } from '@/lib/deadlines';
 import { countsByCategory, useSmartSaveStore } from '@/lib/store';
 import { CATEGORIES, type Category } from '@/lib/types';
 
@@ -21,7 +21,7 @@ export default function HomeScreen() {
   const [query, setQuery] = useState('');
 
   const counts = useMemo(() => countsByCategory(items), [items]);
-  const upcoming = useMemo(() => upcomingDeadlines(items).slice(0, 8), [items]);
+  const upcoming = useMemo(() => allUpcomingDeadlines(items), [items]);
 
   const dueSoonByCategory = useMemo(() => {
     const totals: Record<string, number> = {};
@@ -34,7 +34,11 @@ export default function HomeScreen() {
   }, [items]);
 
   const dueThisWeek = useMemo(
-    () => upcoming.filter((entry) => daysUntil(entry.deadline.date) <= 7).length,
+    () =>
+      upcoming.filter((entry) => {
+        const days = daysUntil(entry.deadline.date);
+        return days >= 0 && days <= 7;
+      }).length,
     [upcoming],
   );
 
@@ -141,47 +145,7 @@ export default function HomeScreen() {
             </View>
           ) : (
             <>
-              <View className="gap-3">
-                <View className="flex-row items-center justify-between">
-                  <Typography type="body" weight="bold">
-                    Upcoming deadlines
-                  </Typography>
-                  {upcoming.length > 0 ? (
-                    <Typography type="body-xs" color="muted">
-                      {`nearest ${upcoming.length}`}
-                    </Typography>
-                  ) : null}
-                </View>
-
-                {upcoming.length > 0 ? (
-                  <ScrollView
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    className="-mx-4"
-                    contentContainerStyle={{ paddingHorizontal: 16, gap: 12 }}
-                  >
-                    {upcoming.map((entry) => (
-                      <UpcomingDeadlineCard key={entry.deadline.id} entry={entry} />
-                    ))}
-                  </ScrollView>
-                ) : (
-                  <Card className="border-border flex-row items-center gap-3 border p-4">
-                    <View className="bg-surface-secondary size-10 items-center justify-center rounded-xl">
-                      <CalendarCheck size={18} color={COLORS.muted} />
-                    </View>
-                    <View className="flex-1 gap-0.5">
-                      <Typography type="body-sm" weight="bold">
-                        {items.length === 0 ? 'Nothing saved yet' : 'Nothing time-sensitive'}
-                      </Typography>
-                      <Typography type="body-xs" color="muted">
-                        {items.length === 0
-                          ? 'Paste your first link and SmartSave reads it, files it, and watches the dates.'
-                          : 'Saved items without a date get a gentle nudge instead.'}
-                      </Typography>
-                    </View>
-                  </Card>
-                )}
-              </View>
+              <UpcomingDeadlineCard count={upcoming.length} dueThisWeek={dueThisWeek} />
 
               <View className="gap-3">
                 <Typography type="body" weight="bold">

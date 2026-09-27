@@ -249,6 +249,22 @@ export interface UpcomingDeadline {
   extraCount: number;
 }
 
+/** Every future dated deadline across the library, soonest first. */
+export function allUpcomingDeadlines(items: Item[], now: Date = new Date()): UpcomingDeadline[] {
+  return items
+    .flatMap((item) => {
+      const scheduled = realDeadlines(item).filter(isScheduled);
+      return scheduled
+        .filter((deadline) => daysUntil(deadline.date, now) >= 0)
+        .map((deadline) => ({
+          item,
+          deadline,
+          extraCount: Math.max(0, scheduled.length - 1),
+        }));
+    })
+    .sort((a, b) => a.deadline.date.localeCompare(b.deadline.date));
+}
+
 /** Nearest deadline per item across the whole library, soonest first. */
 export function upcomingDeadlines(items: Item[], now: Date = new Date()): UpcomingDeadline[] {
   return items

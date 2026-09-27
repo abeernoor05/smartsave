@@ -82,6 +82,7 @@ function AppStack() {
       <Stack.Screen name="folder/[category]" options={{ title: 'Folder' }} />
       <Stack.Screen name="item/[id]" options={{ title: 'Saved item' }} />
       <Stack.Screen name="search" options={{ title: 'Search' }} />
+      <Stack.Screen name="deadlines" options={{ title: 'Upcoming deadlines' }} />
     </Stack>
   );
 }
