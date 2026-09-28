@@ -107,6 +107,20 @@
   --color-soon-soft: oklch(0.31 0.07 70);
   --color-calm: oklch(0.76 0.035 285);
   --color-calm-soft: oklch(0.275 0.035 285);
+
+  /*
+   * HeroUI feeds interaction colors into its native colorKit parser. Keep
+   * these overrides concrete: color-mix() is valid CSS but not parseable by
+   * that runtime, which otherwise logs an RGB conversion error and uses black.
+   */
+  --color-default-hover: #4b4660;
+  --color-accent-hover: #ad91e4;
+  --color-success-hover: #62c993;
+  --color-warning-hover: #e5bc59;
+  --color-danger-hover: #e66f78;
+  --color-accent-soft-hover: rgba(159, 122, 234, 0.2);
+  --color-danger-soft-hover: rgba(230, 111, 120, 0.2);
+  --color-warning-soft-hover: rgba(229, 188, 89, 0.2);
 }
 
 @source './node_modules/heroui-native/lib';
